@@ -40,7 +40,7 @@ export class Level3Scene extends BaseLevelScene {
     const enemy4 = new SoundNinja(this, 25 * 64, 11 * 64)
     this.enemies.add(enemy4)
     
-    const enemy5 = new SoundNinja(this, 37 * 64, 17 * 64)
+    const enemy5 = new SoundNinja(this, 15 * 64, 17 * 64)
     this.enemies.add(enemy5)
   }
 

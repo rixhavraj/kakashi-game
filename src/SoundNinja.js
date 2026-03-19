@@ -24,6 +24,9 @@ export class SoundNinja extends Phaser.Physics.Arcade.Sprite {
     // AI state
     this.aiState = "patrol" // patrol, chase, attack
     this.detectionRange = soundNinjaConfig.detectionRange.value
+    this.attackRange = 80
+    this.attackVerticalTolerance = 100
+    this.chaseDeadzone = 12
     this.lastAttackTime = 0
     this.attackCooldown = soundNinjaConfig.attackCooldown.value
 
@@ -204,6 +207,13 @@ export class SoundNinja extends Phaser.Physics.Arcade.Sprite {
     if (!player || player.isDead) return
 
     const distanceToPlayer = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y)
+    const horizontalDistance = player.x - this.x
+    const verticalDistance = player.y - this.y
+    const absoluteHorizontalDistance = Math.abs(horizontalDistance)
+    const absoluteVerticalDistance = Math.abs(verticalDistance)
+    const withinAttackRange =
+      absoluteHorizontalDistance <= this.attackRange &&
+      absoluteVerticalDistance <= this.attackVerticalTolerance
 
     // State machine logic
     switch (this.aiState) {
@@ -216,9 +226,9 @@ export class SoundNinja extends Phaser.Physics.Arcade.Sprite {
         break
         
       case "chase":
-        this.handleChase(player)
+        this.handleChase(horizontalDistance, absoluteHorizontalDistance)
         // Detect attack range
-        if (distanceToPlayer <= 80 && this.canAttack()) {
+        if (withinAttackRange && this.canAttack()) {
           this.aiState = "attack"
         }
         // Detect if target is lost
@@ -253,9 +263,17 @@ export class SoundNinja extends Phaser.Physics.Arcade.Sprite {
     this.resetOriginAndOffset()
   }
 
-  handleChase(player) {
+  handleChase(horizontalDistance, absoluteHorizontalDistance) {
+    // Stop when horizontally aligned enough to avoid jittering around the same x position.
+    if (absoluteHorizontalDistance <= this.chaseDeadzone) {
+      this.body.setVelocityX(0)
+      this.play("sound_ninja_idle_anim", true)
+      this.resetOriginAndOffset()
+      return
+    }
+
     // Chase player
-    if (player.x < this.x) {
+    if (horizontalDistance < 0) {
       this.facingDirection = "left"
       this.body.setVelocityX(-this.walkSpeed)
     } else {

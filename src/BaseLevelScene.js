@@ -63,10 +63,6 @@ export class BaseLevelScene extends Phaser.Scene {
     this.decorations = this.add.group()
     this.createDecorations()
 
-    // Create solid level obstacles
-    this.obstacles = this.add.group()
-    this.createObstacles()
-
     // Create enemies
     this.enemies = this.add.group()
     this.createEnemies()
@@ -105,12 +101,6 @@ export class BaseLevelScene extends Phaser.Scene {
     // Enemy collision with ground
     this.physics.add.collider(this.enemies, this.groundLayer)
 
-    // Solid obstacles block both player and enemies
-    if (this.obstacles.getLength() > 0) {
-      this.physics.add.collider(this.player, this.obstacles)
-      this.physics.add.collider(this.enemies, this.obstacles)
-    }
-
     // Player takes damage when colliding with enemies
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
       if (player.isInvulnerable || player.isHurting || player.isDead || enemy.isDead) return
@@ -138,21 +128,6 @@ export class BaseLevelScene extends Phaser.Scene {
     })
     this.enemies.add(enemy)
     return enemy
-  }
-
-  createObstacles() {
-    const obstacleDefinitions = this.getObstacleDefinitions()
-
-    obstacleDefinitions.forEach(({ x, y, width, height }) => {
-      const obstacle = this.add.rectangle(x, y, width, height, 0x000000, 0)
-      obstacle.setVisible(false)
-      this.physics.add.existing(obstacle, true)
-      this.obstacles.add(obstacle)
-    })
-  }
-
-  getObstacleDefinitions() {
-    return []
   }
 
   setupInputs() {

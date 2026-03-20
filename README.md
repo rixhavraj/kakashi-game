@@ -1,3 +1,12 @@
+#Start
+make any folder
+In terminal 
+1st cmd ```npm init```
+If get pharser error then install pharser 
+```npm i pharser```
+
+to run this whole project you must have install nodeJS in your device
+
 # Kakashi Game
 
 Phaser + Vite side-scrolling action game.

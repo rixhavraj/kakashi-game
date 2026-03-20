@@ -200,6 +200,12 @@ export class SoundNinja extends Phaser.Physics.Arcade.Sprite {
           this.setActive(false)
         }
       })
+    } else if (this.y > this.scene.mapHeight + 100 && !this.isDead) {
+      // Falling out of the map should never block level completion.
+      this.health = 0
+      this.isDead = true
+      this.setActive(false)
+      this.setVisible(false)
     }
   }
 

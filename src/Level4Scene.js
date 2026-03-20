@@ -30,7 +30,7 @@ export class Level4Scene extends BaseLevelScene {
     this.addEnemy(15 * 64, 12 * 64)
     this.addEnemy(18 * 64, 16 * 64)
     this.addEnemy(24 * 64, 15 * 64)
-    this.addEnemy(28 * 64, 12 * 64)
+    this.addEnemy(29 * 64, 13.45 * 64)
     this.addEnemy(31 * 64, 17 * 64)
   }
 

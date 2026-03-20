@@ -143,9 +143,9 @@ export class BaseLevelScene extends Phaser.Scene {
   createObstacles() {
     const obstacleDefinitions = this.getObstacleDefinitions()
 
-    obstacleDefinitions.forEach(({ x, y, width, height, color = 0x7f5539 }) => {
-      const obstacle = this.add.rectangle(x, y, width, height, color)
-      obstacle.setStrokeStyle(4, 0x2d6a4f)
+    obstacleDefinitions.forEach(({ x, y, width, height }) => {
+      const obstacle = this.add.rectangle(x, y, width, height, 0x000000, 0)
+      obstacle.setVisible(false)
       this.physics.add.existing(obstacle, true)
       this.obstacles.add(obstacle)
     })

@@ -7,6 +7,8 @@ import { TitleScreen } from './TitleScreen.js'
 import { Level1Scene } from './Level1Scene.js'
 import { Level2Scene } from './Level2Scene.js'
 import { Level3Scene } from './Level3Scene.js'
+import { Level4Scene } from './Level4Scene.js'
+import { Level5Scene } from './Level5Scene.js'
 
 import { UIScene } from './UIScene.js'
 import { GameOverUIScene } from './GameOverUIScene.js'
@@ -36,7 +38,10 @@ const config = {
   scene: [InitialLoadingScene, TitleScreen,
     Level1Scene, 
     Level2Scene, 
-    Level3Scene, UIScene, VictoryUIScene, GameCompleteUIScene, GameOverUIScene],
+    Level3Scene,
+    Level4Scene,
+    Level5Scene,
+    UIScene, VictoryUIScene, GameCompleteUIScene, GameOverUIScene],
 }
 
 export default new Phaser.Game(config)

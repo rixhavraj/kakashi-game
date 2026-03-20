@@ -1,5 +1,5 @@
-#Start
-make any folder
+# Start
+make any folder 
 In terminal 
 1st cmd ```npm init```
 If get pharser error then install pharser 

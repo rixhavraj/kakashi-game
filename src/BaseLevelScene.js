@@ -213,25 +213,19 @@ export class BaseLevelScene extends Phaser.Scene {
     if (currentEnemyCount === 0 && !this.gameCompleted) {
       this.gameCompleted = true
 
-      let nextSceneKeyOverride = null
-      if (this.isLastLevel()) {
-        console.log("Game completed!")
-<<<<<<< HEAD
-        nextSceneKeyOverride = "GameCompleteUIScene"
-      }
-
-      this.scene.launch("VictoryUIScene", { 
-        currentLevelKey: this.scene.key,
-        nextSceneKeyOverride,
-=======
-      }
-
-      this.scene.launch("VictoryUIScene", {
+      const isLastLevel = this.isLastLevel()
+      const victorySceneData = {
         currentLevelKey: this.getSceneKey(),
-        isLastLevel: this.isLastLevel(),
+        isLastLevel,
         nextLevelKey: this.getNextLevelScene(),
->>>>>>> d5ccfcceaeea4153817e189d8df5fa4011f90ad4
-      })
+      }
+
+      if (isLastLevel) {
+        console.log("Game completed!")
+        victorySceneData.nextSceneKeyOverride = "GameCompleteUIScene"
+      }
+
+      this.scene.launch("VictoryUIScene", victorySceneData)
     }
   }
 

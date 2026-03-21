@@ -99,8 +99,15 @@ export class VictoryUIScene extends Phaser.Scene {
       }
     }
     this.input.keyboard.on('keydown', this.onKeyDown)
+    this.nativeKeyDown = (event) => {
+      if (event.code === 'Enter' || event.code === 'Space') {
+        this.goToNextLevel()
+      }
+    }
+    window.addEventListener('keydown', this.nativeKeyDown)
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.input.keyboard?.off('keydown', this.onKeyDown)
+      window.removeEventListener('keydown', this.nativeKeyDown)
     })
   }
 

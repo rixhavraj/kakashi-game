@@ -119,13 +119,11 @@ export class VictoryUIScene extends Phaser.Scene {
       // Stop current scene and start next level
       this.scene.stop(this.currentLevelKey)
       this.scene.stop("UIScene")
-      this.scene.stop()
       this.scene.start(this.nextLevelKey)
     } else {
       // If no next level, return to title screen
       this.scene.stop(this.currentLevelKey)
       this.scene.stop("UIScene")
-      this.scene.stop()
       this.scene.start("TitleScreen")
     }
   }

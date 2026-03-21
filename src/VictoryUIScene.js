@@ -1,5 +1,4 @@
 import Phaser from 'phaser'
-import { BaseLevelScene } from './BaseLevelScene'
 import { screenSize } from './gameConfig.json'
 import { isMobileDevice } from './device.js'
 
@@ -17,6 +16,9 @@ export class VictoryUIScene extends Phaser.Scene {
   create() {
     this.isTransitioning = false
     this.isMobile = isMobileDevice()
+    this.currentScene = this.scene.get(this.currentLevelKey)
+    this.isLastLevel = this.currentScene?.isLastLevel?.() ?? false
+    this.nextLevelKey = this.currentScene?.getNextLevelScene?.() ?? null
 
     // Pause main game scene
     this.scene.pause(this.currentLevelKey)
@@ -27,18 +29,36 @@ export class VictoryUIScene extends Phaser.Scene {
     
     this.add.rectangle(screenWidth / 2, screenHeight / 2, screenWidth, screenHeight, 0x000000, 0.7)
     
+    const headline = this.isLastLevel ? 'GAME COMPLETE!' : 'STAGE CLEAR!'
+    const headlineColor = this.isLastLevel ? '#ffd700' : '#00ff00'
+    const promptText = this.isLastLevel
+      ? (this.isMobile ? 'TAP TO RETURN TO MENU' : 'PRESS ENTER TO RETURN TO MENU')
+      : (this.isMobile ? 'TAP FOR NEXT STAGE' : 'PRESS ENTER FOR NEXT STAGE')
+    const subheading = this.isLastLevel ? 'Congratulations, Ninja!' : null
+    
     // Victory text
-    this.victoryText = this.add.text(screenWidth / 2, screenHeight / 2 - 50, 'STAGE CLEAR!', {
+    this.victoryText = this.add.text(screenWidth / 2, screenHeight / 2 - (this.isLastLevel ? 90 : 50), headline, {
       fontFamily: 'RetroPixel, monospace',
       fontSize: '64px',
-      fill: '#00ff00',
+      fill: headlineColor,
       stroke: '#000000',
       strokeThickness: 8,
       align: 'center'
     }).setOrigin(0.5, 0.5)
+
+    if (subheading) {
+      this.subheadingText = this.add.text(screenWidth / 2, screenHeight / 2 - 10, subheading, {
+        fontFamily: 'RetroPixel, monospace',
+        fontSize: '32px',
+        fill: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 4,
+        align: 'center'
+      }).setOrigin(0.5, 0.5)
+    }
     
     // Next level prompt
-    this.nextLevelText = this.add.text(screenWidth / 2, screenHeight / 2 + 50, this.isMobile ? 'TAP FOR NEXT STAGE' : 'PRESS ENTER FOR NEXT STAGE', {
+    this.nextLevelText = this.add.text(screenWidth / 2, screenHeight / 2 + 70, promptText, {
       fontFamily: 'RetroPixel, monospace',
       fontSize: '24px',
       fill: '#ffffff',
@@ -57,7 +77,7 @@ export class VictoryUIScene extends Phaser.Scene {
       repeat: -1
     })
 
-    this.nextLevelButton = this.add.rectangle(screenWidth / 2, screenHeight / 2 + 50, 430, 64, 0xffffff, 0.12)
+    this.nextLevelButton = this.add.rectangle(screenWidth / 2, screenHeight / 2 + 70, 450, 64, 0xffffff, 0.12)
       .setStrokeStyle(3, 0xffffff, 0.45)
       .setInteractive()
     this.nextLevelButton.on('pointerdown', () => {
@@ -88,23 +108,19 @@ export class VictoryUIScene extends Phaser.Scene {
 
     this.isTransitioning = true
 
-    const currentScene = this.scene.get(this.currentLevelKey)
-    if (currentScene?.backgroundMusic) {
-      currentScene.backgroundMusic.stop()
+    if (this.currentScene?.backgroundMusic) {
+      this.currentScene.backgroundMusic.stop()
     }
 
     // Play click sound effect
     this.sound.play("ui_click_sound", { volume: 0.3 })
     
-    // Get next level
-    const nextLevelKey = currentScene.getNextLevelScene()
-    
-    if (nextLevelKey) {
+    if (this.nextLevelKey) {
       // Stop current scene and start next level
       this.scene.stop(this.currentLevelKey)
       this.scene.stop("UIScene")
       this.scene.stop()
-      this.scene.start(nextLevelKey)
+      this.scene.start(this.nextLevelKey)
     } else {
       // If no next level, return to title screen
       this.scene.stop(this.currentLevelKey)

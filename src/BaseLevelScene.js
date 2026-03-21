@@ -222,14 +222,11 @@ export class BaseLevelScene extends Phaser.Scene {
 
       if (this.isLastLevel()) {
         console.log("Game completed!")
-        this.scene.launch("GameCompleteUIScene", { 
-          currentLevelKey: this.scene.key
-        })
-      } else {
-        this.scene.launch("VictoryUIScene", { 
-          currentLevelKey: this.scene.key
-        })
       }
+
+      this.scene.launch("VictoryUIScene", {
+        currentLevelKey: this.scene.key
+      })
     }
   }
 

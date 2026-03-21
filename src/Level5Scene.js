@@ -23,7 +23,7 @@ export class Level5Scene extends BaseLevelScene {
   }
 
   setupMapSize() {
-    this.mapWidth = 45 * 64
+    this.mapWidth = 30 * 64
     this.mapHeight = 20 * 64
   }
 
@@ -33,13 +33,12 @@ export class Level5Scene extends BaseLevelScene {
 
   createEnemies() {
     ;[
-      { x: 9, y: 17 },
       { x: 16, y: 13 },
+      { x: 18, y: 17 },
       { x: 22, y: 15 },
+      { x: 25, y: 15 },
+      { x: 27, y: 15 },
       { x: 28, y: 12 },
-      { x: 34, y: 17 },
-      { x: 38, y: 14 },
-      { x: 41, y: 16 },
     ].forEach((pos) => {
       this.addEnemy(pos.x * 64, pos.y * 64)
     })
@@ -71,11 +70,11 @@ export class Level5Scene extends BaseLevelScene {
   createDecorations() {
     const decorations = [
       { key: "trees_variant_1", x: 4, y: 16, scale: 0.6 },
-      { key: "bushes_variant_2", x: 10, y: 16.9, scale: 0.4 },
+      { key: "bushes_variant_2", x: 10, y: 17.2, scale: 0.4 },
       { key: "rocks_variant_2", x: 18, y: 15.5, scale: 0.5 },
       { key: "trees_variant_3", x: 26, y: 13.5, scale: 0.6 },
-      { key: "wooden_post_variant_1", x: 32, y: 11.5, scale: 0.24 },
-      { key: "grass_variant_1", x: 36, y: 17.2, scale: 0.3 },
+      { key: "wooden_post_variant_1", x: 24, y: 15.5, scale: 0.24 },
+      { key: "grass_variant_1", x: 28, y: 15.8, scale: 0.3 },
     ]
 
     decorations.forEach((item) => {
@@ -87,7 +86,7 @@ export class Level5Scene extends BaseLevelScene {
   }
 
   createObstacles() {
-    this.movingPlatform = this.physics.add.sprite(22 * 64, 11.5 * 64, "rocks_variant_2")
+    this.movingPlatform = this.physics.add.sprite(23 * 64, 15.4 * 64, "rocks_variant_2")
       .setScale(0.5)
       .setImmovable(true)
     this.movingPlatform.body.setAllowGravity(false)
@@ -97,17 +96,17 @@ export class Level5Scene extends BaseLevelScene {
 
     this.tweens.add({
       targets: this.movingPlatform,
-      x: 32 * 64,
+      x: 27 * 64,
       duration: 2800,
       ease: "Sine.easeInOut",
       yoyo: true,
       repeat: -1,
     })
 
-    this.hazardOverlay = this.add.rectangle(29 * 64, 19 * 64, 11 * 64, 1.2 * 64, 0xff6600, 0.2)
+    this.hazardOverlay = this.add.rectangle(23.5 * 64, 19 * 64, 7 * 64, 1.2 * 64, 0xff6600, 0.2)
       .setOrigin(0.5, 0.5)
 
-    this.hazardArea = this.add.zone(29 * 64, 19 * 64, 11 * 64, 1.2 * 64)
+    this.hazardArea = this.add.zone(23.5 * 64, 19 * 64, 7 * 64, 1.2 * 64)
     this.physics.add.existing(this.hazardArea, true)
     this.physics.add.overlap(this.player, this.hazardArea, this.onHazardHit, null, this)
 

@@ -33,7 +33,7 @@ export class Level5Scene extends BaseLevelScene {
 
   createEnemies() {
     ;[
-      { x: 9, y: 17 },
+      { x: 3, y: 17 },
       { x: 16, y: 13 },
       { x: 22, y: 15 },
       { x: 28, y: 12 },
@@ -89,8 +89,8 @@ export class Level5Scene extends BaseLevelScene {
   createObstacles() {
     this.movingPlatform = this.physics.add.sprite(22 * 64, 11.5 * 64, "rocks_variant_2")
       .setScale(0.5)
-      .setAllowGravity(false)
       .setImmovable(true)
+    this.movingPlatform.body.setAllowGravity(false)
 
     this.physics.add.collider(this.player, this.movingPlatform)
     this.physics.add.collider(this.enemies, this.movingPlatform)

@@ -1,5 +1,4 @@
 import Phaser from 'phaser'
-import { BaseLevelScene } from './BaseLevelScene'
 import { screenSize } from './gameConfig.json'
 import { isMobileDevice } from './device.js'
 
@@ -12,6 +11,8 @@ export class VictoryUIScene extends Phaser.Scene {
 
   init(data) {
     this.currentLevelKey = data.currentLevelKey
+    this.nextSceneKeyOverride = data?.nextSceneKeyOverride ?? null
+    this.isFinalLevel = this.nextSceneKeyOverride === "GameCompleteUIScene"
   }
 
   create() {
@@ -28,7 +29,7 @@ export class VictoryUIScene extends Phaser.Scene {
     this.add.rectangle(screenWidth / 2, screenHeight / 2, screenWidth, screenHeight, 0x000000, 0.7)
     
     // Victory text
-    this.victoryText = this.add.text(screenWidth / 2, screenHeight / 2 - 50, 'STAGE CLEAR!', {
+    this.victoryText = this.add.text(screenWidth / 2, screenHeight / 2 - 50, this.isFinalLevel ? 'FINAL STAGE CLEAR!' : 'STAGE CLEAR!', {
       fontFamily: 'RetroPixel, monospace',
       fontSize: '64px',
       fill: '#00ff00',
@@ -37,8 +38,12 @@ export class VictoryUIScene extends Phaser.Scene {
       align: 'center'
     }).setOrigin(0.5, 0.5)
     
+    const ctaText = this.isFinalLevel
+      ? (this.isMobile ? 'TAP TO VIEW ENDING' : 'PRESS ENTER TO VIEW ENDING')
+      : (this.isMobile ? 'TAP FOR NEXT STAGE' : 'PRESS ENTER FOR NEXT STAGE')
+
     // Next level prompt
-    this.nextLevelText = this.add.text(screenWidth / 2, screenHeight / 2 + 50, this.isMobile ? 'TAP FOR NEXT STAGE' : 'PRESS ENTER FOR NEXT STAGE', {
+    this.nextLevelText = this.add.text(screenWidth / 2, screenHeight / 2 + 50, ctaText, {
       fontFamily: 'RetroPixel, monospace',
       fontSize: '24px',
       fill: '#ffffff',
@@ -95,9 +100,19 @@ export class VictoryUIScene extends Phaser.Scene {
 
     // Play click sound effect
     this.sound.play("ui_click_sound", { volume: 0.3 })
+
+    // Handle final level override (launch credits UI instead of another level)
+    if (this.nextSceneKeyOverride === "GameCompleteUIScene") {
+      this.scene.stop("UIScene")
+      this.scene.launch("GameCompleteUIScene", {
+        currentLevelKey: this.currentLevelKey,
+      })
+      this.scene.stop()
+      return
+    }
     
     // Get next level
-    const nextLevelKey = currentScene.getNextLevelScene()
+    const nextLevelKey = currentScene?.getNextLevelScene()
     
     if (nextLevelKey) {
       // Stop current scene and start next level

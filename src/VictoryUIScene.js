@@ -2,6 +2,14 @@ import Phaser from 'phaser'
 import { screenSize } from './gameConfig.json'
 import { isMobileDevice } from './device.js'
 
+const LEVEL_ORDER = [
+  "Level1Scene",
+  "Level2Scene",
+  "Level3Scene",
+  "Level4Scene",
+  "Level5Scene",
+]
+
 export class VictoryUIScene extends Phaser.Scene {
   constructor() {
     super({
@@ -17,8 +25,9 @@ export class VictoryUIScene extends Phaser.Scene {
     this.isTransitioning = false
     this.isMobile = isMobileDevice()
     this.currentScene = this.scene.get(this.currentLevelKey)
-    this.isLastLevel = this.currentScene?.isLastLevel?.() ?? false
-    this.nextLevelKey = this.currentScene?.getNextLevelScene?.() ?? null
+    const currentLevelIndex = LEVEL_ORDER.indexOf(this.currentLevelKey)
+    this.isLastLevel = currentLevelIndex === LEVEL_ORDER.length - 1
+    this.nextLevelKey = this.isLastLevel ? null : LEVEL_ORDER[currentLevelIndex + 1] ?? null
 
     // Pause main game scene
     this.scene.pause(this.currentLevelKey)
@@ -29,12 +38,12 @@ export class VictoryUIScene extends Phaser.Scene {
     
     this.add.rectangle(screenWidth / 2, screenHeight / 2, screenWidth, screenHeight, 0x000000, 0.7)
     
-    const headline = this.isLastLevel ? 'GAME COMPLETE!' : 'STAGE CLEAR!'
+    const headline = this.isLastLevel ? 'VICTORY!' : 'STAGE CLEAR!'
     const headlineColor = this.isLastLevel ? '#ffd700' : '#00ff00'
     const promptText = this.isLastLevel
       ? (this.isMobile ? 'TAP TO RETURN TO MENU' : 'PRESS ENTER TO RETURN TO MENU')
       : (this.isMobile ? 'TAP FOR NEXT STAGE' : 'PRESS ENTER FOR NEXT STAGE')
-    const subheading = this.isLastLevel ? 'Congratulations, Ninja!' : null
+    const subheading = this.isLastLevel ? 'Level 5 complete. Congratulations, Ninja!' : null
     
     // Victory text
     this.victoryText = this.add.text(screenWidth / 2, screenHeight / 2 - (this.isLastLevel ? 90 : 50), headline, {

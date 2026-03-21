@@ -225,7 +225,9 @@ export class BaseLevelScene extends Phaser.Scene {
       }
 
       this.scene.launch("VictoryUIScene", {
-        currentLevelKey: this.scene.key
+        currentLevelKey: this.scene.key,
+        isLastLevel: this.isLastLevel(),
+        nextLevelKey: this.getNextLevelScene(),
       })
     }
   }

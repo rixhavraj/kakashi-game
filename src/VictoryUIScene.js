@@ -2,14 +2,6 @@ import Phaser from 'phaser'
 import { screenSize } from './gameConfig.json'
 import { isMobileDevice } from './device.js'
 
-const LEVEL_ORDER = [
-  "Level1Scene",
-  "Level2Scene",
-  "Level3Scene",
-  "Level4Scene",
-  "Level5Scene",
-]
-
 export class VictoryUIScene extends Phaser.Scene {
   constructor() {
     super({
@@ -19,15 +11,14 @@ export class VictoryUIScene extends Phaser.Scene {
 
   init(data) {
     this.currentLevelKey = data.currentLevelKey
+    this.isLastLevel = data.isLastLevel ?? false
+    this.nextLevelKey = data.nextLevelKey ?? null
   }
 
   create() {
     this.isTransitioning = false
     this.isMobile = isMobileDevice()
     this.currentScene = this.scene.get(this.currentLevelKey)
-    const currentLevelIndex = LEVEL_ORDER.indexOf(this.currentLevelKey)
-    this.isLastLevel = currentLevelIndex === LEVEL_ORDER.length - 1
-    this.nextLevelKey = this.isLastLevel ? null : LEVEL_ORDER[currentLevelIndex + 1] ?? null
 
     // Pause main game scene
     this.scene.pause(this.currentLevelKey)

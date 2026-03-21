@@ -101,7 +101,6 @@ export class GameOverUIScene extends Phaser.Scene {
     // Stop and restart current level
     this.scene.stop(this.currentLevelKey)
     this.scene.stop("UIScene")
-    this.scene.stop()
     this.scene.start(this.currentLevelKey)
   }
 }

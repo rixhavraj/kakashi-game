@@ -262,7 +262,7 @@ export class KakashiPlayer extends Phaser.Physics.Arcade.Sprite {
       this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, (animation, frame) => {
         if (animation.key === "kakashi_die_anim") {
           this.scene.scene.launch("GameOverUIScene", { 
-            currentLevelKey: this.scene.scene.key 
+            currentLevelKey: this.scene.sys.settings.key
           })
         }
       })
@@ -270,7 +270,7 @@ export class KakashiPlayer extends Phaser.Physics.Arcade.Sprite {
       this.health = 0
       this.isDead = true
       this.scene.scene.launch("GameOverUIScene", { 
-        currentLevelKey: this.scene.scene.key 
+        currentLevelKey: this.scene.sys.settings.key
       })
     }
   }

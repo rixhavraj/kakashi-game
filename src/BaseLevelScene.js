@@ -3,10 +3,15 @@ import { KakashiPlayer } from './KakashiPlayer.js'
 import { SoundNinja } from './SoundNinja.js'
 import { screenSize } from './gameConfig.json'
 import { GameInputController } from './GameInputController.js'
+import { LEVEL_ORDER, getLevelNumberFromSceneKey, getNextLevelSceneKey, isLastLevelSceneKey } from './levelFlow.mjs'
 
 export class BaseLevelScene extends Phaser.Scene {
   constructor(config) {
     super(config)
+  }
+
+  getSceneKey() {
+    return this.sys.settings.key
   }
 
   // Unified asset loading using asset-pack.json
@@ -16,27 +21,16 @@ export class BaseLevelScene extends Phaser.Scene {
   }
 
   // Level sequence list
-  static LEVEL_ORDER = [
-    "Level1Scene",
-    "Level2Scene",
-    "Level3Scene",
-    "Level4Scene",
-    "Level5Scene"
-  ]
+  static LEVEL_ORDER = LEVEL_ORDER
 
   // Get next level scene key
   getNextLevelScene() {
-    const currentIndex = BaseLevelScene.LEVEL_ORDER.indexOf(this.scene.key)
-    if (currentIndex >= 0 && currentIndex < BaseLevelScene.LEVEL_ORDER.length - 1) {
-      return BaseLevelScene.LEVEL_ORDER[currentIndex + 1]
-    }
-    return null
+    return getNextLevelSceneKey(this.getSceneKey())
   }
 
   // Check if this is the last level
   isLastLevel() {
-    const currentIndex = BaseLevelScene.LEVEL_ORDER.indexOf(this.scene.key)
-    return currentIndex === BaseLevelScene.LEVEL_ORDER.length - 1
+    return isLastLevelSceneKey(this.getSceneKey())
   }
 
   // Get first level scene key
@@ -113,8 +107,7 @@ export class BaseLevelScene extends Phaser.Scene {
   }
 
   getLevelNumber() {
-    const levelMatch = this.scene.key.match(/\d+/)
-    return levelMatch ? Number(levelMatch[0]) : 1
+    return getLevelNumberFromSceneKey(this.getSceneKey())
   }
 
   getEnemyHealthBonus() {
@@ -223,12 +216,21 @@ export class BaseLevelScene extends Phaser.Scene {
       let nextSceneKeyOverride = null
       if (this.isLastLevel()) {
         console.log("Game completed!")
+<<<<<<< HEAD
         nextSceneKeyOverride = "GameCompleteUIScene"
       }
 
       this.scene.launch("VictoryUIScene", { 
         currentLevelKey: this.scene.key,
         nextSceneKeyOverride,
+=======
+      }
+
+      this.scene.launch("VictoryUIScene", {
+        currentLevelKey: this.getSceneKey(),
+        isLastLevel: this.isLastLevel(),
+        nextLevelKey: this.getNextLevelScene(),
+>>>>>>> d5ccfcceaeea4153817e189d8df5fa4011f90ad4
       })
     }
   }

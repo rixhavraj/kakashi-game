@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test": "node --test",
+    "test:e2e:local": "node tests/repro-level-flow.mjs",
     "preview": "vite preview",
     "build:crazygames": "vite build"
   },
@@ -15,6 +17,7 @@
     "phaser": "^3.90.0"
   },
   "devDependencies": {
+    "playwright-core": "^1.58.2",
     "vite": "^8.0.0"
   },
   "description": "kakashi game ",

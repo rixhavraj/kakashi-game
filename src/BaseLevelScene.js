@@ -9,6 +9,10 @@ export class BaseLevelScene extends Phaser.Scene {
     super(config)
   }
 
+  getSceneKey() {
+    return this.sys.settings.key
+  }
+
   // Unified asset loading using asset-pack.json
   preloadAllAssets() {
     // Load asset pack by type
@@ -26,7 +30,7 @@ export class BaseLevelScene extends Phaser.Scene {
 
   // Get next level scene key
   getNextLevelScene() {
-    const currentIndex = BaseLevelScene.LEVEL_ORDER.indexOf(this.scene.key)
+    const currentIndex = BaseLevelScene.LEVEL_ORDER.indexOf(this.getSceneKey())
     if (currentIndex >= 0 && currentIndex < BaseLevelScene.LEVEL_ORDER.length - 1) {
       return BaseLevelScene.LEVEL_ORDER[currentIndex + 1]
     }
@@ -35,7 +39,7 @@ export class BaseLevelScene extends Phaser.Scene {
 
   // Check if this is the last level
   isLastLevel() {
-    const currentIndex = BaseLevelScene.LEVEL_ORDER.indexOf(this.scene.key)
+    const currentIndex = BaseLevelScene.LEVEL_ORDER.indexOf(this.getSceneKey())
     return currentIndex === BaseLevelScene.LEVEL_ORDER.length - 1
   }
 
@@ -113,7 +117,7 @@ export class BaseLevelScene extends Phaser.Scene {
   }
 
   getLevelNumber() {
-    const levelMatch = this.scene.key.match(/\d+/)
+    const levelMatch = this.getSceneKey().match(/\d+/)
     return levelMatch ? Number(levelMatch[0]) : 1
   }
 
@@ -225,7 +229,7 @@ export class BaseLevelScene extends Phaser.Scene {
       }
 
       this.scene.launch("VictoryUIScene", {
-        currentLevelKey: this.scene.key,
+        currentLevelKey: this.getSceneKey(),
         isLastLevel: this.isLastLevel(),
         nextLevelKey: this.getNextLevelScene(),
       })

@@ -12,7 +12,9 @@ export class VictoryUIScene extends Phaser.Scene {
 
   init(data) {
     this.currentLevelKey = data.currentLevelKey
-    this.nextSceneKeyOverride = data?.nextSceneKeyOverride ?? null
+    this.callerProvidedNextLevelKey = data?.nextLevelKey ?? null
+    const callerMarkedLastLevel = Boolean(data?.isLastLevel)
+    this.nextSceneKeyOverride = data?.nextSceneKeyOverride ?? (callerMarkedLastLevel ? "GameCompleteUIScene" : null)
     this.isFinalLevel = this.nextSceneKeyOverride === "GameCompleteUIScene"
   }
 
@@ -22,8 +24,14 @@ export class VictoryUIScene extends Phaser.Scene {
     this.currentScene = this.scene.get(this.currentLevelKey)
     const victoryContent = getVictoryUiContent(this.currentLevelKey, this.isMobile)
     this.isLastLevel = victoryContent.isLastLevel
-    const defaultNextLevelKey = victoryContent.nextLevelKey
-    this.nextLevelKey = this.isFinalLevel ? null : defaultNextLevelKey
+    this.shouldShowEnding = this.isFinalLevel || this.isLastLevel
+
+    const defaultNextLevelKey = this.callerProvidedNextLevelKey ?? victoryContent.nextLevelKey
+    this.nextLevelKey = this.shouldShowEnding ? null : defaultNextLevelKey
+
+    if (!this.nextSceneKeyOverride && this.shouldShowEnding) {
+      this.nextSceneKeyOverride = "GameCompleteUIScene"
+    }
 
     // Pause main game scene
     this.scene.pause(this.currentLevelKey)
@@ -34,9 +42,9 @@ export class VictoryUIScene extends Phaser.Scene {
     
     this.add.rectangle(screenWidth / 2, screenHeight / 2, screenWidth, screenHeight, 0x000000, 0.7)
     
-    const headline = this.isFinalLevel ? 'FINAL STAGE CLEAR!' : victoryContent.headline
+    const headline = this.shouldShowEnding ? 'FINAL STAGE CLEAR!' : victoryContent.headline
     const headlineColor = victoryContent.headlineColor
-    const promptText = this.isFinalLevel
+    const promptText = this.shouldShowEnding
       ? (this.isMobile ? 'TAP TO VIEW ENDING' : 'PRESS ENTER TO VIEW ENDING')
       : victoryContent.promptText
     const subheading = victoryContent.subheading
@@ -142,7 +150,7 @@ export class VictoryUIScene extends Phaser.Scene {
     this.sound.play("ui_click_sound", { volume: 0.3 })
 
     // Handle final level override (launch credits UI instead of another level)
-    if (this.nextSceneKeyOverride === "GameCompleteUIScene") {
+    if (this.shouldShowEnding) {
       this.scene.stop("UIScene")
       this.scene.launch("GameCompleteUIScene", {
         currentLevelKey: this.currentLevelKey,

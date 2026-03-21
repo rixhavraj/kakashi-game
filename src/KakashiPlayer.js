@@ -21,11 +21,12 @@ export class KakashiPlayer extends Phaser.Physics.Arcade.Sprite {
     this.isPunching = false // Punching state
     this.isKicking = false // Kicking state
     this.isChidori = false // Chidori state
-    this.isSharingan = false // Sharingan state
     this.isHurting = false // Hurt stun state
     this.isInvulnerable = false // Invulnerable state
     this.hurtingDuration = kakashiConfig.hurtingDuration.value // Hurt stun duration
     this.invulnerableTime = kakashiConfig.invulnerableTime.value // Invulnerability time
+    this.chidoriCooldown = 3000
+    this.lastChidoriTime = -Infinity
     
     // Attack target tracking system
     this.currentMeleeTargets = new Set() // Track currently hit targets
@@ -65,7 +66,6 @@ export class KakashiPlayer extends Phaser.Physics.Arcade.Sprite {
     
     // Effects
     this.dustEffects = [] // Changed to array to store multiple dust effects
-    this.sharinganEffect = null // Sharingan effect
   }
 
   // Initialize all sounds
@@ -74,7 +74,6 @@ export class KakashiPlayer extends Phaser.Physics.Arcade.Sprite {
     this.punchSound = this.scene.sound.add("punch_sound", { volume: 0.3 })
     this.kickSound = this.scene.sound.add("kick_sound", { volume: 0.3 })
     this.chidoriSound = this.scene.sound.add("chidori_sound", { volume: 0.3 })
-    this.sharinganSound = this.scene.sound.add("sharingan_distortion_sound", { volume: 0.3 })
     this.hurtSound = this.scene.sound.add("ninja_hurt_sound", { volume: 0.3 })
     this.dieSound = this.scene.sound.add("ninja_die_sound", { volume: 0.3 })
   }
@@ -226,27 +225,10 @@ export class KakashiPlayer extends Phaser.Physics.Arcade.Sprite {
       })
     }
 
-    // Sharingan animation
-    if (!anims.exists("kakashi_sharingan_anim")) {
-      anims.create({
-        key: "kakashi_sharingan_anim",
-        frames: [
-          {
-            key: "kakashi_sharingan_frame1",
-            duration: 400,
-          },
-          {
-            key: "kakashi_sharingan_frame2",
-            duration: 300,
-          },
-        ],
-        repeat: 0,
-      })
-    }
   }
 
-  update(keys) {
-    if (!this.body || !this.active || this.isDead || this.isPunching || this.isKicking || this.isChidori || this.isSharingan || this.isHurting) {
+  update(actions) {
+    if (!this.body || !this.active || this.isDead || this.isPunching || this.isKicking || this.isChidori || this.isHurting) {
       return
     }
 
@@ -256,13 +238,13 @@ export class KakashiPlayer extends Phaser.Physics.Arcade.Sprite {
     }
 
     // Handle attack state
-    if (!this.isDead && !this.isPunching && !this.isKicking && !this.isChidori && !this.isSharingan && !this.isHurting) {
-      this.handleAttacks(keys)
+    if (!this.isDead && !this.isPunching && !this.isKicking && !this.isChidori && !this.isHurting) {
+      this.handleAttacks(actions)
     }
 
     // Handle movement
-    if (!this.isDead && !this.isPunching && !this.isKicking && !this.isChidori && !this.isSharingan && !this.isHurting) {
-      this.handleMovement(keys)
+    if (!this.isDead && !this.isPunching && !this.isKicking && !this.isChidori && !this.isHurting) {
+      this.handleMovement(actions)
     }
 
     // Update attack trigger
@@ -293,9 +275,9 @@ export class KakashiPlayer extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  handleAttacks(keys) {
+  handleAttacks(actions) {
     // J key punch attack
-    if (Phaser.Input.Keyboard.JustDown(keys.J) && !this.isPunching) {
+    if (actions.punch && !this.isPunching) {
       // Clear attack target records, start new attack
       this.currentMeleeTargets.clear()
       this.updateMeleeTrigger()
@@ -315,7 +297,7 @@ export class KakashiPlayer extends Phaser.Physics.Arcade.Sprite {
     }
 
     // K key kick attack
-    if (Phaser.Input.Keyboard.JustDown(keys.K) && !this.isKicking) {
+    if (actions.kick && !this.isKicking) {
       // Clear attack target records, start new attack
       this.currentMeleeTargets.clear()
       this.updateMeleeTrigger()
@@ -335,11 +317,12 @@ export class KakashiPlayer extends Phaser.Physics.Arcade.Sprite {
     }
 
     // L key Chidori attack
-    if (Phaser.Input.Keyboard.JustDown(keys.L) && !this.isChidori) {
+    if (actions.chidori && !this.isChidori && this.canUseChidori()) {
       // Clear attack target records, start new attack
       this.currentMeleeTargets.clear()
       this.updateMeleeTrigger()
       this.isChidori = true
+      this.lastChidoriTime = this.scene.time.now
 
       // Chidori needs forward dash
       const dashSpeed = this.facingDirection === "right" ? 400 : -400
@@ -366,19 +349,18 @@ export class KakashiPlayer extends Phaser.Physics.Arcade.Sprite {
         }
       })
     }
-
-    // U key Sharingan space-time distortion
-    if (Phaser.Input.Keyboard.JustDown(keys.U) && !this.isSharingan) {
-      this.useSharingan()
-    }
   }
 
-  handleMovement(keys) {
+  canUseChidori() {
+    return this.scene.time.now - this.lastChidoriTime >= this.chidoriCooldown
+  }
+
+  handleMovement(actions) {
     // WASD and Arrow keys movement controls
-    if (keys.A.isDown || keys.LEFT.isDown) {
+    if (actions.moveX < 0) {
       this.body.setVelocityX(-this.walkSpeed)
       this.facingDirection = "left"
-    } else if (keys.D.isDown || keys.RIGHT.isDown) {
+    } else if (actions.moveX > 0) {
       this.body.setVelocityX(this.walkSpeed)
       this.facingDirection = "right"
     } else {
@@ -392,7 +374,7 @@ export class KakashiPlayer extends Phaser.Physics.Arcade.Sprite {
     const wasOnFloor = this.body.blocked.down
     
     // Jump (W or UP arrow)
-    if ((keys.W.isDown || keys.UP.isDown) && this.body.blocked.down) {
+    if (actions.jump && this.body.blocked.down) {
       this.body.setVelocityY(-this.jumpPower)
       this.jumpSound.play()
       // Show dust effect when jumping
@@ -460,10 +442,6 @@ export class KakashiPlayer extends Phaser.Physics.Arcade.Sprite {
           break;
         case "kakashi_die_anim":
           baseOriginX = 0.622;
-          baseOriginY = 1.0;
-          break;
-        case "kakashi_sharingan_anim":
-          baseOriginX = 0.244;
           baseOriginY = 1.0;
           break;
         default:
@@ -596,143 +574,6 @@ export class KakashiPlayer extends Phaser.Physics.Arcade.Sprite {
         }
       })
     }
-  }
-
-  // Sharingan space-time distortion attack
-  useSharingan() {
-    // Find nearest enemy
-    const nearestEnemy = this.findNearestEnemy()
-    if (!nearestEnemy) return // Do not execute when no enemies
-    
-    this.isSharingan = true
-    this.body.setVelocityX(0) // Stop moving when using Sharingan
-    
-    // Play Sharingan sound effect
-    this.sharinganSound.play()
-    
-    // Play Sharingan pre-attack animation
-    this.play("kakashi_sharingan_anim", true)
-    this.resetOriginAndOffset()
-    
-    // Start space-time distortion after animation completes
-    this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, (animation, frame) => {
-      if (animation.key === "kakashi_sharingan_anim") {
-        // Check if scene and camera are still valid
-        if (!this.scene || !this.scene.cameras || !this.scene.cameras.main || !this.active) {
-          return // Return directly if scene or object is invalid
-        }
-        
-        // VFX effect and shake start simultaneously
-        // Sharingan skill screen shake effect - synchronized with VFX, reduce shake strength
-        try {
-          this.scene.cameras.main.shake(2500, 0.015) // Duration 2500ms, strength 0.015 (reduce shake amplitude)
-        } catch (error) {
-          console.warn("Failed to shake camera:", error)
-          // If shake fails, continue with other logic
-        }
-        
-        // Create space-time distortion effect at enemy position
-        if (nearestEnemy && nearestEnemy.active) {
-          this.sharinganEffect = this.scene.add.image(nearestEnemy.x, nearestEnemy.y - nearestEnemy.body.height / 2, "red_sharingan_distortion")
-          this.sharinganEffect.setScale(0.4)
-          this.sharinganEffect.setOrigin(0.5, 0.5)
-        } else {
-          // If enemy is invalid, skill ends
-          this.isSharingan = false
-          return
-        }
-        
-        // Rotation and pulse animation
-        if (this.scene.tweens && this.sharinganEffect) {
-          this.scene.tweens.add({
-            targets: this.sharinganEffect,
-            rotation: Math.PI * 4, // Rotate two full turns
-            scaleX: 0.6,
-            scaleY: 0.6,
-            duration: 1500,
-            ease: 'Power2.easeInOut'
-          })
-          
-          // Fade animation
-          this.scene.tweens.add({
-            targets: this.sharinganEffect,
-            alpha: 0,
-            duration: 2000,
-            delay: 500,
-            onComplete: () => {
-              if (this.sharinganEffect) {
-                this.sharinganEffect.destroy()
-                this.sharinganEffect = null
-              }
-              // Force stop shake effect when VFX ends
-              if (this.scene && this.scene.cameras && this.scene.cameras.main && this.scene.cameras.main.shakeEffect) {
-                try {
-                  this.scene.cameras.main.shakeEffect.destroy()
-                } catch (error) {
-                  console.warn("Failed to destroy shake effect:", error)
-                }
-              }
-              // Ensure camera resumes normal follow, but first check if player object is still valid
-              if (this.active && this.scene && this.scene.cameras && this.scene.cameras.main) {
-                try {
-                  this.scene.cameras.main.stopFollow()
-                  this.scene.cameras.main.startFollow(this)
-                } catch (error) {
-                  console.warn("Failed to restore camera follow:", error)
-                }
-              }
-            }
-          })
-        }
-        
-        // Delay enemy death (space-time distortion takes time)
-        this.scene.time.delayedCall(1000, () => {
-          if (nearestEnemy && nearestEnemy.active && !nearestEnemy.isDead) {
-            // Directly kill enemy, no regular damage
-            nearestEnemy.health = 0
-            nearestEnemy.isDead = true
-            nearestEnemy.body.setVelocityX(0)
-            nearestEnemy.play("sound_ninja_die_anim", true)
-            nearestEnemy.resetOriginAndOffset()
-            nearestEnemy.dieSound.play()
-            
-            nearestEnemy.once(Phaser.Animations.Events.ANIMATION_COMPLETE, (animation, frame) => {
-              if (animation.key === "sound_ninja_die_anim") {
-                nearestEnemy.setActive(false)
-                nearestEnemy.setVisible(false)
-              }
-            })
-          }
-        })
-        
-        // Sharingan state duration
-        this.scene.time.delayedCall(2000, () => {
-          this.isSharingan = false
-        })
-      }
-    })
-  }
-
-  // Find nearest enemy
-  findNearestEnemy() {
-    const enemies = this.scene.enemies.children.entries.filter(enemy => 
-      enemy.active && !enemy.isDead
-    )
-    
-    if (enemies.length === 0) return null
-    
-    let nearestEnemy = null
-    let nearestDistance = Infinity
-    
-    enemies.forEach(enemy => {
-      const distance = Phaser.Math.Distance.Between(this.x, this.y, enemy.x, enemy.y)
-      if (distance < nearestDistance) {
-        nearestDistance = distance
-        nearestEnemy = enemy
-      }
-    })
-    
-    return nearestEnemy
   }
 
   // Show damage number effect

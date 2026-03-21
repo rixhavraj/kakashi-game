@@ -28,20 +28,23 @@ export class Level3Scene extends BaseLevelScene {
 
   createEnemies() {
     // 5 enemies on different platforms
-    const enemy1 = new SoundNinja(this, 8 * 64, 15 * 64)
-    this.enemies.add(enemy1)
+    this.addEnemy(8 * 64, 15 * 64)
     
-    const enemy2 = new SoundNinja(this, 13 * 64, 13 * 64)
-    this.enemies.add(enemy2)
+    this.addEnemy(13 * 64, 13 * 64)
     
-    const enemy3 = new SoundNinja(this, 19 * 64, 16 * 64)
-    this.enemies.add(enemy3)
+    this.addEnemy(19 * 64, 16 * 64)
     
-    const enemy4 = new SoundNinja(this, 25 * 64, 11 * 64)
-    this.enemies.add(enemy4)
+    this.addEnemy(25 * 64, 11 * 64)
     
-    const enemy5 = new SoundNinja(this, 15 * 64, 17 * 64)
-    this.enemies.add(enemy5)
+    this.addEnemy(15 * 64, 17 * 64)
+  }
+
+  getObstacleDefinitions() {
+    return [
+      { x: 11 * 64, y: 18.8 * 64, width: 96, height: 44 },
+      { x: 22 * 64, y: 17.6 * 64, width: 128, height: 44 },
+      { x: 31 * 64, y: 14.2 * 64, width: 96, height: 44 },
+    ]
   }
 
   createBackground() {

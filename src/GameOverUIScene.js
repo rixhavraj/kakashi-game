@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { screenSize } from './gameConfig.json'
+import { isMobileDevice } from './device.js'
 
 export class GameOverUIScene extends Phaser.Scene {
   constructor() {
@@ -13,6 +14,9 @@ export class GameOverUIScene extends Phaser.Scene {
   }
 
   create() {
+    this.isRestarting = false
+    this.isMobile = isMobileDevice()
+
     // Pause main game scene
     this.scene.pause(this.currentLevelKey)
     
@@ -36,7 +40,7 @@ export class GameOverUIScene extends Phaser.Scene {
     }).setOrigin(0.5, 0.5)
     
     // Retry prompt
-    this.retryText = this.add.text(screenWidth / 2, screenHeight / 2 + 50, 'PRESS ENTER TO RETRY', {
+    this.retryText = this.add.text(screenWidth / 2, screenHeight / 2 + 50, this.isMobile ? 'TAP TO RETRY' : 'PRESS ENTER TO RETRY', {
       fontFamily: 'RetroPixel, monospace',
       fontSize: '24px',
       fill: '#ffffff',
@@ -54,6 +58,19 @@ export class GameOverUIScene extends Phaser.Scene {
       yoyo: true,
       repeat: -1
     })
+
+    this.retryButton = this.add.rectangle(screenWidth / 2, screenHeight / 2 + 50, 360, 64, 0xffffff, 0.12)
+      .setStrokeStyle(3, 0xffffff, 0.45)
+      .setInteractive()
+    this.retryButton.on('pointerdown', () => {
+      this.restartLevel()
+    })
+
+    this.retryText.setDepth(this.retryButton.depth + 1)
+    this.retryText.setInteractive()
+    this.retryText.on('pointerdown', () => {
+      this.restartLevel()
+    })
     
     // Setup input listeners
     this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER)
@@ -67,6 +84,17 @@ export class GameOverUIScene extends Phaser.Scene {
   }
 
   restartLevel() {
+    if (this.isRestarting) {
+      return
+    }
+
+    this.isRestarting = true
+
+    const currentScene = this.scene.get(this.currentLevelKey)
+    if (currentScene?.backgroundMusic) {
+      currentScene.backgroundMusic.stop()
+    }
+
     // Play click sound effect
     this.sound.play("ui_click_sound", { volume: 0.3 })
     

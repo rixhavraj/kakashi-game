@@ -17,11 +17,15 @@ import { GameCompleteUIScene } from './GameCompleteUIScene.js'
 
 const config = {
   type: Phaser.AUTO,
+  parent: "game",
   width: screenSize.width.value,
   height: screenSize.height.value,
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
+  input: {
+    activePointers: 6,
   },
   physics: {
     default: "arcade",
@@ -41,7 +45,10 @@ const config = {
     Level3Scene,
     Level4Scene,
     Level5Scene,
-    UIScene, VictoryUIScene, GameCompleteUIScene, GameOverUIScene],
+    UIScene,
+    VictoryUIScene,
+    GameCompleteUIScene,
+    GameOverUIScene],
 }
 
 export default new Phaser.Game(config)

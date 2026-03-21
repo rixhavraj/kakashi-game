@@ -28,17 +28,21 @@ export class Level2Scene extends BaseLevelScene {
 
   createEnemies() {
     // 4 enemies spread across the level
-    const enemy1 = new SoundNinja(this, 12 * 64, 17 * 64)
-    this.enemies.add(enemy1)
+    this.addEnemy(12 * 64, 17 * 64)
     
-    const enemy2 = new SoundNinja(this, 15 * 64, 12 * 64)
-    this.enemies.add(enemy2)
+    this.addEnemy(15 * 64, 12 * 64)
     
-    const enemy3 = new SoundNinja(this, 13 * 64, 15 * 64)
-    this.enemies.add(enemy3)
+    this.addEnemy(13 * 64, 15 * 64)
     
-    const enemy4 = new SoundNinja(this, 17 * 64, 16 * 64)
-    this.enemies.add(enemy4)
+    this.addEnemy(17 * 64, 16 * 64)
+  }
+
+  getObstacleDefinitions() {
+    return [
+      { x: 9 * 64, y: 19 * 64, width: 96, height: 44 },
+      { x: 21 * 64, y: 16.8 * 64, width: 96, height: 44 },
+      { x: 28 * 64, y: 13.6 * 64, width: 128, height: 44 },
+    ]
   }
 
   createBackground() {

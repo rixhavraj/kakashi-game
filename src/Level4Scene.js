@@ -1,6 +1,5 @@
 import { BaseLevelScene } from './BaseLevelScene.js'
 import { KakashiPlayer } from './KakashiPlayer.js'
-import { SoundNinja } from './SoundNinja.js'
 
 export class Level4Scene extends BaseLevelScene {
   constructor() {
@@ -27,25 +26,19 @@ export class Level4Scene extends BaseLevelScene {
   }
 
   createEnemies() {
-    // 5 enemies on rooftops
-    const enemy1 = new SoundNinja(this, 10 * 64, 18 * 64)
-    this.enemies.add(enemy1)
-    
-    const enemy2 = new SoundNinja(this, 16 * 64, 14 * 64)
-    this.enemies.add(enemy2)
-    
-    const enemy3 = new SoundNinja(this, 23 * 64, 10 * 64)
-    this.enemies.add(enemy3)
-    
-    const enemy4 = new SoundNinja(this, 34 * 64, 15 * 64)
-    this.enemies.add(enemy4)
-    
-    const enemy5 = new SoundNinja(this, 42 * 64, 17 * 64)
-    this.enemies.add(enemy5)
+    ;[
+      { x: 10, y: 18 },
+      { x: 16, y: 14 },
+      { x: 23, y: 10 },
+      { x: 34, y: 15 },
+      { x: 42, y: 17 },
+    ].forEach((pos) => {
+      this.addEnemy(pos.x * 64, pos.y * 64)
+    })
   }
 
   createBackground() {
-    let backgroundKey = "konoha_village_background"
+    const backgroundKey = "konoha_village_background"
     const bgImage = this.add.image(0, 0, backgroundKey).setOrigin(0, 0)
     const bgScale = this.mapHeight / bgImage.height
     bgImage.setScale(bgScale)
@@ -67,19 +60,19 @@ export class Level4Scene extends BaseLevelScene {
   }
 
   createDecorations() {
-    const post1 = this.add.image(4 * 64, 16 * 64, "wooden_post_variant_1").setOrigin(0.5, 1).setScale(0.25)
-    this.decorations.add(post1)
-    
-    const bush1 = this.add.image(17 * 64, 14 * 64, "bushes_variant_1").setOrigin(0.5, 1).setScale(0.4)
-    this.decorations.add(bush1)
-    
-    const rock1 = this.add.image(29 * 64, 12 * 64, "rocks_variant_1").setOrigin(0.5, 1).setScale(0.5)
-    this.decorations.add(rock1)
-    
-    const tree1 = this.add.image(35 * 64, 15 * 64, "trees_variant_3").setOrigin(0.5, 1).setScale(0.6)
-    this.decorations.add(tree1)
-    
-    const grass1 = this.add.image(43 * 64, 17 * 64, "grass_variant_1").setOrigin(0.5, 1).setScale(0.3)
-    this.decorations.add(grass1)
+    const decorations = [
+      { key: "wooden_post_variant_1", x: 4, y: 16, scale: 0.25 },
+      { key: "bushes_variant_1", x: 17, y: 14, scale: 0.4 },
+      { key: "rocks_variant_1", x: 29, y: 12, scale: 0.5 },
+      { key: "trees_variant_3", x: 35, y: 15, scale: 0.6 },
+      { key: "grass_variant_1", x: 43, y: 17, scale: 0.3 },
+    ]
+
+    decorations.forEach((item) => {
+      const decoration = this.add.image(item.x * 64, item.y * 64, item.key)
+        .setOrigin(0.5, 1)
+        .setScale(item.scale)
+      this.decorations.add(decoration)
+    })
   }
 }

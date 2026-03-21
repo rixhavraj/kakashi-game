@@ -51,16 +51,20 @@ export class Level1Scene extends BaseLevelScene {
   // Create enemies
   createEnemies() {
     // Create a Sound Ninja on central low platform (x: 15 tiles, y: 18 tiles)
-    const enemy1 = new SoundNinja(this, 15 * 64, 18 * 64)
-    this.enemies.add(enemy1)
+    this.addEnemy(15 * 64, 18 * 64)
     
     // Create a Sound Ninja on right high platform (x: 25 tiles, y: 15 tiles)
-    const enemy2 = new SoundNinja(this, 25 * 64, 15 * 64)
-    this.enemies.add(enemy2)
+    this.addEnemy(25 * 64, 15 * 64)
     
     // Create a Sound Ninja on central floating platform (x: 15 tiles, y: 14 tiles)
-    const enemy3 = new SoundNinja(this, 15 * 64, 14 * 64)
-    this.enemies.add(enemy3)
+    this.addEnemy(15 * 64, 14 * 64)
+  }
+
+  getObstacleDefinitions() {
+    return [
+      { x: 9.5 * 64, y: 18.2 * 64, width: 96, height: 44 },
+      { x: 20.5 * 64, y: 19 * 64, width: 128, height: 44 },
+    ]
   }
 
   // Create background

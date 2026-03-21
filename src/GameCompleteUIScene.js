@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { screenSize } from './gameConfig.json'
+import { isMobileDevice } from './device.js'
 
 export class GameCompleteUIScene extends Phaser.Scene {
   constructor() {
@@ -13,6 +14,9 @@ export class GameCompleteUIScene extends Phaser.Scene {
   }
 
   create() {
+    this.isReturningToMenu = false
+    this.isMobile = isMobileDevice()
+
     // Pause main game scene
     this.scene.pause(this.currentLevelKey)
     
@@ -43,7 +47,7 @@ export class GameCompleteUIScene extends Phaser.Scene {
     }).setOrigin(0.5, 0.5)
     
     // Return to main menu prompt
-    this.menuText = this.add.text(screenWidth / 2, screenHeight / 2 + 80, 'PRESS ENTER TO RETURN TO MENU', {
+    this.menuText = this.add.text(screenWidth / 2, screenHeight / 2 + 80, this.isMobile ? 'TAP TO RETURN TO MENU' : 'PRESS ENTER TO RETURN TO MENU', {
       fontFamily: 'RetroPixel, monospace',
       fontSize: '24px',
       fill: '#ffffff',
@@ -60,6 +64,19 @@ export class GameCompleteUIScene extends Phaser.Scene {
       ease: 'Sine.easeInOut',
       yoyo: true,
       repeat: -1
+    })
+
+    this.menuButton = this.add.rectangle(screenWidth / 2, screenHeight / 2 + 80, 450, 64, 0xffffff, 0.12)
+      .setStrokeStyle(3, 0xffffff, 0.45)
+      .setInteractive()
+    this.menuButton.on('pointerdown', () => {
+      this.returnToMenu()
+    })
+
+    this.menuText.setDepth(this.menuButton.depth + 1)
+    this.menuText.setInteractive()
+    this.menuText.on('pointerdown', () => {
+      this.returnToMenu()
     })
     
     // Add celebration animation
@@ -85,6 +102,17 @@ export class GameCompleteUIScene extends Phaser.Scene {
   }
 
   returnToMenu() {
+    if (this.isReturningToMenu) {
+      return
+    }
+
+    this.isReturningToMenu = true
+
+    const currentScene = this.scene.get(this.currentLevelKey)
+    if (currentScene?.backgroundMusic) {
+      currentScene.backgroundMusic.stop()
+    }
+
     // Play click sound effect
     this.sound.play("ui_click_sound", { volume: 0.3 })
     

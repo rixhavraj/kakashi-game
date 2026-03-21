@@ -17,30 +17,24 @@ export class Level4Scene extends BaseLevelScene {
   }
 
   setupMapSize() {
-    this.mapWidth = 35 * 64
+    this.mapWidth = 45 * 64
     this.mapHeight = 20 * 64
   }
 
   createPlayer() {
-    this.player = new KakashiPlayer(this, 2 * 64, 18 * 64)
+    this.player = new KakashiPlayer(this, 3 * 64, 16 * 64)
   }
 
   createEnemies() {
-    this.addEnemy(10 * 64, 17 * 64)
-    this.addEnemy(15 * 64, 12 * 64)
-    this.addEnemy(18 * 64, 16 * 64)
-    this.addEnemy(24 * 64, 15 * 64)
-    this.addEnemy(29 * 64, 13.45 * 64)
-    this.addEnemy(31 * 64, 17 * 64)
-  }
-
-  getObstacleDefinitions() {
-    return [
-      { x: 8 * 64, y: 19 * 64, width: 96, height: 44 },
-      { x: 14 * 64, y: 14.5 * 64, width: 128, height: 44 },
-      { x: 22 * 64, y: 17.2 * 64, width: 96, height: 44 },
-      { x: 29 * 64, y: 13.8 * 64, width: 128, height: 44 },
-    ]
+    ;[
+      { x: 10, y: 18 },
+      { x: 16, y: 14 },
+      { x: 23, y: 10 },
+      { x: 34, y: 15 },
+      { x: 42, y: 17 },
+    ].forEach((pos) => {
+      this.addEnemy(pos.x * 64, pos.y * 64)
+    })
   }
 
   createBackground() {
@@ -50,7 +44,6 @@ export class Level4Scene extends BaseLevelScene {
     bgImage.setScale(bgScale)
     const scaledBgWidth = bgImage.width * bgScale
     const numRepeats = Math.ceil(this.mapWidth / scaledBgWidth)
-
     for (let i = 0; i < numRepeats; i++) {
       this.add.image(i * scaledBgWidth, 0, backgroundKey)
         .setOrigin(0, 0)
@@ -60,17 +53,26 @@ export class Level4Scene extends BaseLevelScene {
   }
 
   createTileMap() {
-    this.map = this.make.tilemap({ key: "level2_map" })
+    this.map = this.make.tilemap({ key: "level4_map" })
     this.forestGroundTileset = this.map.addTilesetImage("forest_ground", "forest_ground")
     this.groundLayer = this.map.createLayer("ground", this.forestGroundTileset, 0, 0)
     this.groundLayer.setCollisionByExclusion([-1])
   }
 
   createDecorations() {
-    this.decorations.add(this.add.image(4 * 64, 18 * 64, "trees_variant_1").setOrigin(0.5, 1).setScale(0.6))
-    this.decorations.add(this.add.image(12 * 64, 17 * 64, "rocks_variant_2").setOrigin(0.5, 1).setScale(0.5))
-    this.decorations.add(this.add.image(20 * 64, 14 * 64, "trees_variant_3").setOrigin(0.5, 1).setScale(0.55))
-    this.decorations.add(this.add.image(26 * 64, 16 * 64, "wooden_post_variant_1").setOrigin(0.5, 1).setScale(0.25))
-    this.decorations.add(this.add.image(33 * 64, 18 * 64, "grass_variant_1").setOrigin(0.5, 1).setScale(0.3))
+    const decorations = [
+      { key: "wooden_post_variant_1", x: 4, y: 16, scale: 0.25 },
+      { key: "bushes_variant_1", x: 17, y: 14, scale: 0.4 },
+      { key: "rocks_variant_1", x: 29, y: 12, scale: 0.5 },
+      { key: "trees_variant_3", x: 35, y: 15, scale: 0.6 },
+      { key: "grass_variant_1", x: 43, y: 17, scale: 0.3 },
+    ]
+
+    decorations.forEach((item) => {
+      const decoration = this.add.image(item.x * 64, item.y * 64, item.key)
+        .setOrigin(0.5, 1)
+        .setScale(item.scale)
+      this.decorations.add(decoration)
+    })
   }
 }

@@ -25,6 +25,16 @@
         "type": "tilemapTiledJSON",
         "key": "level3_map",
         "url": "https://cdn-game-mcp.gambo.ai/87d1e73c-f31f-4a4e-9ca6-a6ee0431a8fe/tile_maps/level1_map.json"
+      },
+      {
+        "type": "tilemapTiledJSON",
+        "key": "level4_map",
+        "url": "https://cdn-game-mcp.gambo.ai/87d1e73c-f31f-4a4e-9ca6-a6ee0431a8fe/tile_maps/level1_map.json"
+      },
+      {
+        "type": "tilemapTiledJSON",
+        "key": "level5_map",
+        "url": "https://cdn-game-mcp.gambo.ai/87d1e73c-f31f-4a4e-9ca6-a6ee0431a8fe/tile_maps/level1_map.json"
       }
     ]
   },

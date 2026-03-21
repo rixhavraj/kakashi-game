@@ -119,7 +119,6 @@ export class GameCompleteUIScene extends Phaser.Scene {
     // Stop all scenes and return to title screen
     this.scene.stop(this.currentLevelKey)
     this.scene.stop("UIScene")
-    this.scene.stop()
     this.scene.start("TitleScreen")
   }
 }

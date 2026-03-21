@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { screenSize } from './gameConfig.json'
+import { isMobileDevice } from './device.js'
 
 export class TitleScreen extends Phaser.Scene {
   constructor() {
@@ -18,6 +19,8 @@ export class TitleScreen extends Phaser.Scene {
   }
 
   create() {
+    this.isMobile = isMobileDevice()
+
     // Create background
     this.createBackground()
     this.createUI()
@@ -70,8 +73,13 @@ export class TitleScreen extends Phaser.Scene {
     const screenWidth = screenSize.width.value
     const screenHeight = screenSize.height.value
     
-    // Create PRESS ENTER text (centered at bottom)
-    this.pressEnterText = this.add.text(screenWidth / 2, screenHeight * 0.75, 'PRESS ENTER TO START', {
+    const startPrompt = this.isMobile ? 'TAP TO START' : 'PRESS ENTER TO START'
+    const controlsPrompt = this.isMobile
+      ? 'D-PAD: MOVE/JUMP  |  BUTTONS: PUNCH  KICK  CHIDORI'
+      : 'WASD: Move  |  J: Punch  |  K: Kick  |  L: Chidori'
+
+    // Create start text (centered at bottom)
+    this.pressEnterText = this.add.text(screenWidth / 2, screenHeight * 0.75, startPrompt, {
       fontFamily: 'RetroPixel, monospace',
       fontSize: Math.min(screenWidth / 20, 48) + 'px',
       fill: '#ffffff',
@@ -95,7 +103,7 @@ export class TitleScreen extends Phaser.Scene {
     
     // Add control instructions
     this.controlsText = this.add.text(screenWidth / 2, this.pressEnterText.y + 60, 
-      'WASD: Move  |  J: Punch  |  K: Kick  |  L: Chidori', {
+      controlsPrompt, {
       fontFamily: 'RetroPixel, monospace',
       fontSize: Math.min(screenWidth / 40, 24) + 'px',
       fill: '#ffffff',
@@ -103,6 +111,18 @@ export class TitleScreen extends Phaser.Scene {
       strokeThickness: 5,
       align: 'center'
     }).setOrigin(0.5, 0.5)
+
+    if (this.isMobile) {
+      this.mobileHintText = this.add.text(screenWidth / 2, this.controlsText.y + 44,
+        'Landscape mode recommended on phones', {
+        fontFamily: 'RetroPixel, monospace',
+        fontSize: Math.min(screenWidth / 52, 18) + 'px',
+        fill: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 4,
+        align: 'center'
+      }).setOrigin(0.5, 0.5)
+    }
   }
 
   // Setup input listeners

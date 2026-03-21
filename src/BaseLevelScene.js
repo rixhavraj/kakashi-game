@@ -1,9 +1,8 @@
 import Phaser from 'phaser'
 import { KakashiPlayer } from './KakashiPlayer.js'
-
-
 import { SoundNinja } from './SoundNinja.js'
 import { screenSize } from './gameConfig.json'
+import { GameInputController } from './GameInputController.js'
 
 export class BaseLevelScene extends Phaser.Scene {
   constructor(config) {
@@ -131,22 +130,7 @@ export class BaseLevelScene extends Phaser.Scene {
   }
 
   setupInputs() {
-    // Create WASD key inputs
-    this.keys = {
-      W: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
-      A: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-      S: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
-      D: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
-      J: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.J),
-      K: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K),
-      L: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L),
-      U: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.U),
-      // Add arrow keys support
-      UP: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP),
-      DOWN: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),
-      LEFT: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
-      RIGHT: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT)
-    }
+    this.inputController = new GameInputController(this)
   }
 
   // Setup attack collision detection
@@ -157,8 +141,7 @@ export class BaseLevelScene extends Phaser.Scene {
       this.enemies,
       (trigger, enemy) => {
         // Check Kakashi attack state
-        const isAttacking = this.player.isPunching || this.player.isKicking || 
-                           this.player.isChidori || this.player.isSharingan
+        const isAttacking = this.player.isPunching || this.player.isKicking || this.player.isChidori
         
         if (isAttacking && !this.player.currentMeleeTargets.has(enemy)) {
           // Do not respond when dead or hurt
@@ -175,7 +158,6 @@ export class BaseLevelScene extends Phaser.Scene {
           if (this.player.isPunching) damage = 20
           else if (this.player.isKicking) damage = 25
           else if (this.player.isChidori) damage = 9999 // Kakashi Chidori is a guaranteed one-hit kill
-          else if (this.player.isSharingan) damage = 9999 // Kakashi Sharingan directly kills
           
           // Finally call takeDamage
           enemy.takeDamage(damage)
@@ -212,8 +194,10 @@ export class BaseLevelScene extends Phaser.Scene {
 
   // General update method
   baseUpdate() {
+    const actions = this.inputController.update()
+
     // Update player
-    this.player.update(this.keys)
+    this.player.update(actions)
 
     // Update enemies
     this.enemies.children.entries.forEach(enemy => {

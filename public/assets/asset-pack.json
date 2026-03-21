@@ -145,16 +145,6 @@
       },
       {
         "type": "image",
-        "key": "kakashi_sharingan_frame1",
-        "url": "https://cdn-game-mcp.gambo.ai/e4a903c2-a39e-43f5-815f-320042fb5aec/animations/kakashi_sharingan_R/frame_1.png"
-      },
-      {
-        "type": "image",
-        "key": "kakashi_sharingan_frame2",
-        "url": "https://cdn-game-mcp.gambo.ai/11e57578-6555-4006-8aa8-97f30b0d6738/animations/kakashi_sharingan_R/frame_2.png"
-      },
-      {
-        "type": "image",
         "key": "sound_ninja_idle_frame1",
         "url": "https://cdn-game-mcp.gambo.ai/1075c2fa-73e1-451e-8043-c0be7535871e/animations/sound_ninja_idle_R/frame_1.png"
       },
@@ -260,11 +250,6 @@
         "type": "image",
         "key": "dust_effect",
         "url": "https://cdn-game-mcp.gambo.ai/e4cf36d7-1de8-43d1-99ec-ac8d1e44a883/images/dust_effect.png"
-      },
-      {
-        "type": "image",
-        "key": "red_sharingan_distortion",
-        "url": "https://cdn-game-mcp.gambo.ai/523b2939-8cb0-4082-a9d0-8fcba4b78d3f/images/red_sharingan_distortion.png"
       }
     ]
   },
@@ -314,11 +299,6 @@
         "type": "audio",
         "key": "ui_click_sound",
         "url": "https://cdn-game-mcp.gambo.ai/b86ccff4-0702-414e-aa35-e075a7bed822_ui_click_sound.mp3"
-      },
-      {
-        "type": "audio",
-        "key": "sharingan_distortion_sound",
-        "url": "https://cdn-game-mcp.gambo.ai/4effa919-d77a-42a2-a535-62c4977096df_sharingan_distortion_sound.mp3"
       }
     ]
   },

@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { screenSize } from './gameConfig.json'
 import { isMobileDevice } from './device.js'
+import { getVictoryUiContent } from './levelFlow.mjs'
 
 export class VictoryUIScene extends Phaser.Scene {
   constructor() {
@@ -11,14 +12,15 @@ export class VictoryUIScene extends Phaser.Scene {
 
   init(data) {
     this.currentLevelKey = data.currentLevelKey
-    this.isLastLevel = data.isLastLevel ?? false
-    this.nextLevelKey = data.nextLevelKey ?? null
   }
 
   create() {
     this.isTransitioning = false
     this.isMobile = isMobileDevice()
     this.currentScene = this.scene.get(this.currentLevelKey)
+    const victoryContent = getVictoryUiContent(this.currentLevelKey, this.isMobile)
+    this.isLastLevel = victoryContent.isLastLevel
+    this.nextLevelKey = victoryContent.nextLevelKey
 
     // Pause main game scene
     this.scene.pause(this.currentLevelKey)
@@ -29,12 +31,10 @@ export class VictoryUIScene extends Phaser.Scene {
     
     this.add.rectangle(screenWidth / 2, screenHeight / 2, screenWidth, screenHeight, 0x000000, 0.7)
     
-    const headline = this.isLastLevel ? 'VICTORY!' : 'STAGE CLEAR!'
-    const headlineColor = this.isLastLevel ? '#ffd700' : '#00ff00'
-    const promptText = this.isLastLevel
-      ? (this.isMobile ? 'TAP TO RETURN TO MENU' : 'PRESS ENTER TO RETURN TO MENU')
-      : (this.isMobile ? 'TAP FOR NEXT STAGE' : 'PRESS ENTER FOR NEXT STAGE')
-    const subheading = this.isLastLevel ? 'Level 5 complete. Congratulations, Ninja!' : null
+    const headline = victoryContent.headline
+    const headlineColor = victoryContent.headlineColor
+    const promptText = victoryContent.promptText
+    const subheading = victoryContent.subheading
     
     // Victory text
     this.victoryText = this.add.text(screenWidth / 2, screenHeight / 2 - (this.isLastLevel ? 90 : 50), headline, {
@@ -93,6 +93,15 @@ export class VictoryUIScene extends Phaser.Scene {
     // Setup input listeners
     this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER)
     this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+    this.onKeyDown = (event) => {
+      if (event.code === 'Enter' || event.code === 'Space') {
+        this.goToNextLevel()
+      }
+    }
+    this.input.keyboard.on('keydown', this.onKeyDown)
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.input.keyboard?.off('keydown', this.onKeyDown)
+    })
   }
 
   update() {

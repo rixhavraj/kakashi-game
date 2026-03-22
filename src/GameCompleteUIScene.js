@@ -37,7 +37,7 @@ export class GameCompleteUIScene extends Phaser.Scene {
     }).setOrigin(0.5, 0.5)
     
     // Congratulations text
-    this.congratsText = this.add.text(screenWidth / 2, screenHeight / 2 - 20, 'Congratulations, Ninja!', {
+    this.congratsText = this.add.text(screenWidth / 2, screenHeight / 2 - 20, 'Pain has fallen. Hidden Rain is safe!', {
       fontFamily: 'RetroPixel, monospace',
       fontSize: '32px',
       fill: '#ffffff',

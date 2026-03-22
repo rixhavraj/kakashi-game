@@ -1,0 +1,14 @@
+{
+  "columns": 7,
+  "image": "https://cdn-game-mcp.gambo.ai/23fc7413-cd86-4f37-bcee-ee7322aeeefd/tilesets/forest_ground.png",
+  "imageheight": 448,
+  "imagewidth": 448,
+  "margin": 0,
+  "name": "mountain_tileset",
+  "spacing": 0,
+  "tilecount": 47,
+  "tileheight": 64,
+  "tilewidth": 64,
+  "type": "tileset",
+  "version": "1.10"
+}

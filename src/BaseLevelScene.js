@@ -4,6 +4,7 @@ import { SoundNinja } from './SoundNinja.js'
 import { screenSize } from './gameConfig.json'
 import { GameInputController } from './GameInputController.js'
 import { LEVEL_ORDER, getLevelNumberFromSceneKey, getNextLevelSceneKey, isLastLevelSceneKey } from './levelFlow.mjs'
+import { enableDeveloperLevelSkip } from './devtools.js'
 
 export class BaseLevelScene extends Phaser.Scene {
   constructor(config) {
@@ -85,6 +86,9 @@ export class BaseLevelScene extends Phaser.Scene {
 
     // Show UI
     this.scene.launch("UIScene")
+
+    // Enable developer-only level skipping for faster testing
+    enableDeveloperLevelSkip(this)
   }
 
   setupBaseCollisions() {

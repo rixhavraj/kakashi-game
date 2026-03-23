@@ -17,13 +17,25 @@ import { GameOverUIScene } from './GameOverUIScene.js'
 import { VictoryUIScene } from './VictoryUIScene.js'
 import { GameCompleteUIScene } from './GameCompleteUIScene.js'
 
+const MIN_VIEWPORT = { width: 640, height: 360 }
+
+function getViewportSize() {
+  const width = Math.max(window.innerWidth || 0, MIN_VIEWPORT.width)
+  const height = Math.max(window.innerHeight || 0, MIN_VIEWPORT.height)
+  return { width, height }
+}
+
+const initialViewport = getViewportSize()
+screenSize.width.value = initialViewport.width
+screenSize.height.value = initialViewport.height
+
 const config = {
   type: Phaser.AUTO,
   parent: "game",
   width: screenSize.width.value,
   height: screenSize.height.value,
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   input: {
@@ -60,5 +72,18 @@ const game = new Phaser.Game(config)
 if (typeof window !== 'undefined') {
   window.__game = game
 }
+
+function handleResize() {
+  const viewport = getViewportSize()
+  screenSize.width.value = viewport.width
+  screenSize.height.value = viewport.height
+  game.scale.resize(viewport.width, viewport.height)
+  if (game.canvas) {
+    game.canvas.style.width = "100%"
+    game.canvas.style.height = "100%"
+  }
+}
+
+window.addEventListener("resize", handleResize)
 
 export default game

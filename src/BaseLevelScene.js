@@ -4,6 +4,7 @@ import { SoundNinja } from './SoundNinja.js'
 import { screenSize } from './gameConfig.json'
 import { GameInputController } from './GameInputController.js'
 import { LEVEL_ORDER, getLevelNumberFromSceneKey, getNextLevelSceneKey, isLastLevelSceneKey } from './levelFlow.mjs'
+import { enableDeveloperLevelSkip } from './devtools.js'
 
 export class BaseLevelScene extends Phaser.Scene {
   constructor(config) {
@@ -117,6 +118,9 @@ export class BaseLevelScene extends Phaser.Scene {
 
     // Show UI
     this.scene.launch("UIScene")
+
+    // Enable developer-only level skipping for faster testing
+    enableDeveloperLevelSkip(this)
   }
 
   setupBaseCollisions() {
@@ -245,15 +249,19 @@ export class BaseLevelScene extends Phaser.Scene {
     if (currentEnemyCount === 0 && !this.gameCompleted) {
       this.gameCompleted = true
 
-      if (this.isLastLevel()) {
-        console.log("Game completed!")
+      const isLastLevel = this.isLastLevel()
+      const victorySceneData = {
+        currentLevelKey: this.getSceneKey(),
+        isLastLevel,
+        nextLevelKey: this.getNextLevelScene(),
       }
 
-      this.scene.launch("VictoryUIScene", {
-        currentLevelKey: this.getSceneKey(),
-        isLastLevel: this.isLastLevel(),
-        nextLevelKey: this.getNextLevelScene(),
-      })
+      if (isLastLevel) {
+        console.log("Game completed!")
+        victorySceneData.nextSceneKeyOverride = "GameCompleteUIScene"
+      }
+
+      this.scene.launch("VictoryUIScene", victorySceneData)
     }
   }
 

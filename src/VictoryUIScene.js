@@ -12,6 +12,10 @@ export class VictoryUIScene extends Phaser.Scene {
 
   init(data) {
     this.currentLevelKey = data.currentLevelKey
+    this.callerProvidedNextLevelKey = data?.nextLevelKey ?? null
+    const callerMarkedLastLevel = Boolean(data?.isLastLevel)
+    this.nextSceneKeyOverride = data?.nextSceneKeyOverride ?? (callerMarkedLastLevel ? "GameCompleteUIScene" : null)
+    this.isFinalLevel = this.nextSceneKeyOverride === "GameCompleteUIScene"
   }
 
   create() {
@@ -20,7 +24,14 @@ export class VictoryUIScene extends Phaser.Scene {
     this.currentScene = this.scene.get(this.currentLevelKey)
     const victoryContent = getVictoryUiContent(this.currentLevelKey, this.isMobile)
     this.isLastLevel = victoryContent.isLastLevel
-    this.nextLevelKey = victoryContent.nextLevelKey
+    this.shouldShowEnding = this.isFinalLevel || this.isLastLevel
+
+    const defaultNextLevelKey = this.callerProvidedNextLevelKey ?? victoryContent.nextLevelKey
+    this.nextLevelKey = this.shouldShowEnding ? null : defaultNextLevelKey
+
+    if (!this.nextSceneKeyOverride && this.shouldShowEnding) {
+      this.nextSceneKeyOverride = "GameCompleteUIScene"
+    }
 
     // Pause main game scene
     this.scene.pause(this.currentLevelKey)
@@ -31,20 +42,27 @@ export class VictoryUIScene extends Phaser.Scene {
     
     this.add.rectangle(screenWidth / 2, screenHeight / 2, screenWidth, screenHeight, 0x000000, 0.7)
     
-    const headline = victoryContent.headline
+    const headline = this.shouldShowEnding ? 'FINAL STAGE CLEAR!' : victoryContent.headline
     const headlineColor = victoryContent.headlineColor
-    const promptText = victoryContent.promptText
+    const promptText = this.shouldShowEnding
+      ? (this.isMobile ? 'TAP TO VIEW ENDING' : 'PRESS ENTER TO VIEW ENDING')
+      : victoryContent.promptText
     const subheading = victoryContent.subheading
     
     // Victory text
-    this.victoryText = this.add.text(screenWidth / 2, screenHeight / 2 - (this.isLastLevel ? 90 : 50), headline, {
-      fontFamily: 'RetroPixel, monospace',
-      fontSize: '64px',
-      fill: headlineColor,
-      stroke: '#000000',
-      strokeThickness: 8,
-      align: 'center'
-    }).setOrigin(0.5, 0.5)
+    this.victoryText = this.add.text(
+      screenWidth / 2,
+      screenHeight / 2 - (this.isLastLevel ? 90 : 50),
+      headline,
+      {
+        fontFamily: 'RetroPixel, monospace',
+        fontSize: '64px',
+        fill: headlineColor,
+        stroke: '#000000',
+        strokeThickness: 8,
+        align: 'center'
+      }
+    ).setOrigin(0.5, 0.5)
 
     if (subheading) {
       this.subheadingText = this.add.text(screenWidth / 2, screenHeight / 2 - 10, subheading, {
@@ -131,6 +149,16 @@ export class VictoryUIScene extends Phaser.Scene {
 
     // Play click sound effect
     this.sound.play("ui_click_sound", { volume: 0.3 })
+
+    // Handle final level override (launch credits UI instead of another level)
+    if (this.shouldShowEnding) {
+      this.scene.stop("UIScene")
+      this.scene.launch("GameCompleteUIScene", {
+        currentLevelKey: this.currentLevelKey,
+      })
+      this.scene.stop()
+      return
+    }
     
     if (this.nextLevelKey) {
       // Stop current scene and start next level

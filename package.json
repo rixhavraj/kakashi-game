@@ -21,5 +21,17 @@
   "devDependencies": {
     "playwright-core": "^1.58.2",
     "vite": "^8.0.0"
-  }
+  },
+  "description": "kakashi game ",
+  "main": "vite.config.js",
+  "repository": {
+    "type": "git",
+    "url": "kakashi-game"
+  },
+  "keywords": [
+    "naruto",
+    "kakashi"
+  ],
+  "author": "Rishav",
+  "license": "ISC"
 }

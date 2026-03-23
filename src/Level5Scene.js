@@ -33,6 +33,7 @@ export class Level5Scene extends BaseLevelScene {
 
   createEnemies() {
     ;[
+      { x: 3, y: 17 },
       { x: 16, y: 13 },
       { x: 18, y: 17 },
       { x: 22, y: 15 },

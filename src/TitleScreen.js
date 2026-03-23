@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { screenSize } from './gameConfig.json'
 import { isMobileDevice } from './device.js'
+import { enableDeveloperLevelSkip } from './devtools.js'
 
 export class TitleScreen extends Phaser.Scene {
   constructor() {
@@ -26,6 +27,23 @@ export class TitleScreen extends Phaser.Scene {
     this.createUI()
     this.setupInputs()
     this.playBackgroundMusic()
+
+    this.devSkipEnabled = enableDeveloperLevelSkip(this)
+    if (this.devSkipEnabled) {
+      this.add.text(
+        screenSize.width.value - 20,
+        screenSize.height.value - 20,
+        'Ctrl+L: Jump to level',
+        {
+          fontFamily: 'RetroPixel, monospace',
+          fontSize: '16px',
+          fill: '#b0ffc5',
+          stroke: '#000000',
+          strokeThickness: 3,
+          align: 'right'
+        }
+      ).setOrigin(1, 1).setAlpha(0.7)
+    }
   }
 
   // Create background (use level 1 background)

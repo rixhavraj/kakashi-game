@@ -43,11 +43,25 @@ async function advanceVictory(expectedLevelKey, expectedNextLevelKey, expectedHe
 
   await page.click('canvas')
   await page.keyboard.press('Enter')
+  await page.waitForTimeout(500)
+}
+
+async function returnFromGameComplete() {
+  await waitForScene(page, 'GameCompleteUIScene', 10000)
+  await page.click('canvas')
+  await page.keyboard.press('Enter')
+  await page.waitForTimeout(500)
 }
 
 try {
   await bootGame(page)
-  await startScene(page, 'Level5Scene')
+  await startScene(page, 'Level4Scene')
+
+  await clearSceneEnemies('Level4Scene')
+  await advanceVictory('Level4Scene', 'Level5Scene')
+  await waitForScene(page, 'Level5Scene', 10000)
+  console.log('Transitioned to Level5Scene')
+
   await clearSceneEnemies('Level5Scene')
   await advanceVictory('Level5Scene', 'Level6Scene')
   await waitForScene(page, 'Level6Scene', 10000)
@@ -69,9 +83,10 @@ try {
   console.log('Transitioned to Level7Scene')
 
   await clearSceneEnemies('Level7Scene')
-  await advanceVictory('Level7Scene', null, 'VICTORY!')
+  await advanceVictory('Level7Scene', null, 'FINAL STAGE CLEAR!')
+  await returnFromGameComplete()
   await waitForScene(page, 'TitleScreen', 10000)
-  console.log('Returned to TitleScreen after level 7 victory')
+  console.log('Returned to TitleScreen after level 7 completion')
 } finally {
   await browser.close()
 }

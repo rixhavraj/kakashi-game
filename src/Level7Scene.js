@@ -55,6 +55,7 @@ export class Level7Scene extends BaseLevelScene {
     if (!this.groundLayer) {
       console.warn('[Level7] Ground layer missing from tilemap.')
     } else {
+      // Collidable metadata lives on the layer (not individual tiles), so just collide with everything except -1.
       this.groundLayer.setCollisionByExclusion([-1])
     }
 

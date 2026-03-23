@@ -89,6 +89,7 @@ export class GameOverUIScene extends Phaser.Scene {
     }
 
     this.isRestarting = true
+    const overlaySceneKey = this.sys.settings.key
 
     const currentScene = this.scene.get(this.currentLevelKey)
     if (currentScene?.backgroundMusic) {
@@ -101,6 +102,7 @@ export class GameOverUIScene extends Phaser.Scene {
     // Stop and restart current level
     this.scene.stop(this.currentLevelKey)
     this.scene.stop("UIScene")
+    this.scene.stop(overlaySceneKey)
     this.scene.start(this.currentLevelKey)
   }
 }

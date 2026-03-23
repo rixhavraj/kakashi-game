@@ -4,6 +4,8 @@ export const LEVEL_ORDER = Object.freeze([
   "Level3Scene",
   "Level4Scene",
   "Level5Scene",
+  "Level6Scene",
+  "Level7Scene",
 ])
 
 export function getNextLevelSceneKey(currentLevelKey) {
@@ -26,6 +28,14 @@ export function getLevelNumberFromSceneKey(sceneKey) {
 
 export function getVictoryUiContent(currentLevelKey, isMobile) {
   const isLastLevel = isLastLevelSceneKey(currentLevelKey)
+  const levelNumber = getLevelNumberFromSceneKey(currentLevelKey)
+  let subheading = null
+
+  if (isLastLevel) {
+    subheading = levelNumber >= 7
+      ? "Level 7 complete. Peace restored to the Hidden Leaf!"
+      : `Level ${levelNumber} complete. Congratulations, Ninja!`
+  }
 
   return {
     isLastLevel,
@@ -35,6 +45,6 @@ export function getVictoryUiContent(currentLevelKey, isMobile) {
     promptText: isLastLevel
       ? (isMobile ? 'TAP TO RETURN TO MENU' : 'PRESS ENTER TO RETURN TO MENU')
       : (isMobile ? 'TAP FOR NEXT STAGE' : 'PRESS ENTER FOR NEXT STAGE'),
-    subheading: isLastLevel ? 'Level 5 complete. Congratulations, Ninja!' : null,
+    subheading,
   }
 }

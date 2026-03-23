@@ -107,6 +107,7 @@ export class GameCompleteUIScene extends Phaser.Scene {
     }
 
     this.isReturningToMenu = true
+    const overlaySceneKey = this.sys.settings.key
 
     const currentScene = this.scene.get(this.currentLevelKey)
     if (currentScene?.backgroundMusic) {
@@ -119,6 +120,7 @@ export class GameCompleteUIScene extends Phaser.Scene {
     // Stop all scenes and return to title screen
     this.scene.stop(this.currentLevelKey)
     this.scene.stop("UIScene")
+    this.scene.stop(overlaySceneKey)
     this.scene.start("TitleScreen")
   }
 }

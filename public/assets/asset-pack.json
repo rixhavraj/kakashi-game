@@ -35,6 +35,16 @@
         "type": "tilemapTiledJSON",
         "key": "level5_map",
         "url": "https://cdn-game-mcp.gambo.ai/87d1e73c-f31f-4a4e-9ca6-a6ee0431a8fe/tile_maps/level1_map.json"
+      },
+      {
+        "type": "tilemapTiledJSON",
+        "key": "level6_map",
+        "url": "https://cdn-game-mcp.gambo.ai/87d1e73c-f31f-4a4e-9ca6-a6ee0431a8fe/tile_maps/level1_map.json"
+      },
+      {
+        "type": "tilemapTiledJSON",
+        "key": "level7_map",
+        "url": "assets/level7_map.json"
       }
     ]
   },
@@ -44,6 +54,11 @@
       {
         "type": "image",
         "key": "forest_ground",
+        "url": "https://cdn-game-mcp.gambo.ai/23fc7413-cd86-4f37-bcee-ee7322aeeefd/tilesets/forest_ground.png"
+      },
+      {
+        "type": "image",
+        "key": "mountain_tileset",
         "url": "https://cdn-game-mcp.gambo.ai/23fc7413-cd86-4f37-bcee-ee7322aeeefd/tilesets/forest_ground.png"
       }
     ]

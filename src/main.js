@@ -69,6 +69,10 @@ const config = {
 
 const game = new Phaser.Game(config)
 
+if (typeof window !== 'undefined') {
+  window.__game = game
+}
+
 function handleResize() {
   const viewport = getViewportSize()
   screenSize.width.value = viewport.width

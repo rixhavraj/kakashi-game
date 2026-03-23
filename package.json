@@ -6,7 +6,9 @@
     "dev": "vite",
     "build": "vite build",
     "test": "node --test",
-    "test:e2e:local": "node tests/repro-level-flow.mjs",
+    "test:e2e:flow": "node tests/repro-level-flow.mjs",
+    "test:e2e:level6": "node tests/repro-level6-platforms.mjs",
+    "test:e2e:local": "npm run test:e2e:flow && npm run test:e2e:level6",
     "preview": "vite preview",
     "build:crazygames": "vite build"
   },

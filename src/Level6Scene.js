@@ -8,6 +8,8 @@ export class Level6Scene extends BaseLevelScene {
   }
 
   create() {
+    this.supportBodies = []
+    this.movingPlatforms = []
     this.createBaseElements()
     this.createFloatingPlatforms()
     this.createBossArenaPlatform()
@@ -19,6 +21,8 @@ export class Level6Scene extends BaseLevelScene {
   }
 
   update() {
+    this.syncMovingPlatforms()
+    this.carryMovingPlatformRiders()
     this.baseUpdate()
     this.animateStorm()
   }
@@ -99,31 +103,53 @@ export class Level6Scene extends BaseLevelScene {
 
   createFloatingPlatforms() {
     this.floatingPlatforms = this.physics.add.group({ allowGravity: false, immovable: true })
+    this.floatingPlatformVisuals = this.add.group()
     const platformData = [
-      { x: 18 * 64, y: 11 * 64, offset: 4 * 64, duration: 3200 },
-      { x: 30 * 64, y: 9 * 64, offset: 5 * 64, duration: 3600 },
-      { x: 40 * 64, y: 7 * 64, offset: 3 * 64, duration: 2800 },
+      { x: 18 * 64, y: 11 * 64, offset: 4 * 64, duration: 3200, colliderWidth: 120, colliderHeight: 24, colliderYOffset: 6 },
+      { x: 30 * 64, y: 9 * 64, offset: 5 * 64, duration: 3600, colliderWidth: 120, colliderHeight: 24, colliderYOffset: 6 },
+      { x: 40 * 64, y: 7 * 64, offset: 3 * 64, duration: 2800, colliderWidth: 120, colliderHeight: 24, colliderYOffset: 6 },
     ]
 
     platformData.forEach((config) => {
-      const platform = this.physics.add.sprite(config.x, config.y, "rocks_variant_2")
+      const visual = this.add.image(config.x, config.y, "rocks_variant_2")
         .setScale(0.48)
-        .setImmovable(true)
-      platform.body.setAllowGravity(false)
-      this.floatingPlatforms.add(platform)
+      this.floatingPlatformVisuals.add(visual)
+
+      const collider = this.add.rectangle(
+        config.x,
+        config.y + config.colliderYOffset,
+        config.colliderWidth,
+        config.colliderHeight,
+        0xffffff,
+        0
+      )
+      this.physics.add.existing(collider, false)
+      collider.body.setAllowGravity(false)
+      collider.body.setImmovable(true)
+      collider.body.setSize(config.colliderWidth, config.colliderHeight)
+      collider.body.updateFromGameObject()
+      this.floatingPlatforms.add(collider)
+      this.registerSupportBody(collider.body)
+
+      this.movingPlatforms.push({
+        visual,
+        collider,
+        lastX: collider.x,
+        deltaX: 0,
+      })
 
       this.tweens.add({
-        targets: platform,
+        targets: [visual, collider],
         x: config.x + config.offset,
         duration: config.duration,
         ease: "Sine.easeInOut",
         yoyo: true,
         repeat: -1,
       })
-    })
 
-    this.physics.add.collider(this.player, this.floatingPlatforms)
-    this.physics.add.collider(this.enemies, this.floatingPlatforms)
+      this.physics.add.collider(this.player, collider)
+      this.physics.add.collider(this.enemies, collider)
+    })
   }
 
   createBossArenaPlatform() {
@@ -139,6 +165,7 @@ export class Level6Scene extends BaseLevelScene {
     this.physics.add.existing(this.bossArenaVisual, true)
     this.bossArenaVisual.body.setSize(platformWidth, platformHeight)
     this.bossArenaVisual.body.updateFromGameObject()
+    this.registerSupportBody(this.bossArenaVisual.body)
 
     this.physics.add.collider(this.player, this.bossArenaVisual)
     this.physics.add.collider(this.enemies, this.bossArenaVisual)
@@ -158,6 +185,7 @@ export class Level6Scene extends BaseLevelScene {
       this.physics.add.existing(colliderRect, true)
       colliderRect.body.setSize(cfg.width, cfg.height)
       colliderRect.body.updateFromGameObject()
+      this.registerSupportBody(colliderRect.body)
 
       const tilestrip = this.add.tileSprite(cfg.x, cfg.y, cfg.width, cfg.height + 12, 'forest_ground')
         .setOrigin(0.5, 0.5)
@@ -205,5 +233,76 @@ export class Level6Scene extends BaseLevelScene {
     if (this.stormOverlay) {
       this.stormOverlay.alpha = 0.2 + 0.15 * Math.sin(this.time.now * 0.004)
     }
+  }
+
+  getSupportBodies() {
+    return this.supportBodies
+  }
+
+  registerSupportBody(body) {
+    if (!body || this.supportBodies.includes(body)) {
+      return
+    }
+
+    this.supportBodies.push(body)
+  }
+
+  syncMovingPlatforms() {
+    this.movingPlatforms.forEach((platform) => {
+      platform.collider.body.updateFromGameObject()
+      platform.deltaX = platform.collider.x - platform.lastX
+      platform.lastX = platform.collider.x
+    })
+  }
+
+  carryMovingPlatformRiders() {
+    this.carryActorWithPlatforms(this.player)
+
+    this.enemies.children.entries.forEach((enemy) => {
+      if (enemy?.active) {
+        this.carryActorWithPlatforms(enemy)
+      }
+    })
+  }
+
+  carryActorWithPlatforms(actor) {
+    if (!actor?.body?.enable) {
+      return
+    }
+
+    for (const platform of this.movingPlatforms) {
+      if (Math.abs(platform.deltaX) < 0.05) {
+        continue
+      }
+
+      if (!this.isActorStandingOnPlatform(actor, platform.collider)) {
+        continue
+      }
+
+      const carryX = platform.deltaX * 0.55
+      actor.x += carryX
+      if (actor.body.prev) {
+        actor.body.prev.x += carryX
+      }
+      break
+    }
+  }
+
+  isActorStandingOnPlatform(actor, platformCollider) {
+    const actorBody = actor?.body
+    const platformBody = platformCollider?.body
+
+    if (!actorBody?.enable || !platformBody?.enable) {
+      return false
+    }
+
+    const overlapLeft = Math.max(actorBody.left, platformBody.left)
+    const overlapRight = Math.min(actorBody.right, platformBody.right)
+    const horizontalOverlap = overlapRight - overlapLeft
+    const verticalGap = Math.abs(actorBody.bottom - platformBody.top)
+    const supportThreshold = Math.min(Math.max(actorBody.width * 0.45, 24), 40)
+    const isGrounded = actorBody.blocked.down || actorBody.touching.down
+
+    return horizontalOverlap >= supportThreshold && verticalGap <= 3 && actorBody.velocity.y >= -8 && isGrounded
   }
 }

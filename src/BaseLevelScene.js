@@ -39,6 +39,38 @@ export class BaseLevelScene extends Phaser.Scene {
     return BaseLevelScene.LEVEL_ORDER[0]
   }
 
+  getSupportBodies() {
+    return []
+  }
+
+  getSupportBodyAtWorldXY(x, y, options = {}) {
+    const { verticalTolerance = 8, horizontalTolerance = 0 } = options
+
+    return this.getSupportBodies().find((body) => {
+      if (!body?.enable) {
+        return false
+      }
+
+      const left = Math.min(body.left, body.right) - horizontalTolerance
+      const right = Math.max(body.left, body.right) + horizontalTolerance
+      const top = Math.min(body.top, body.bottom)
+      const bottom = Math.max(body.top, body.bottom)
+
+      return x >= left && x <= right && y >= top - verticalTolerance && y <= bottom + verticalTolerance
+    }) ?? null
+  }
+
+  hasSupportAtWorldXY(x, y, options = {}) {
+    if (this.groundLayer) {
+      const supportTile = this.groundLayer.getTileAtWorldXY(x, y)
+      if (supportTile && supportTile.index !== -1 && supportTile.collides) {
+        return true
+      }
+    }
+
+    return Boolean(this.getSupportBodyAtWorldXY(x, y, options))
+  }
+
   // General creation method
   createBaseElements() {
     // Initialize gameCompleted flag

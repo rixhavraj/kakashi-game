@@ -1,123 +1,92 @@
-import { chromium } from 'playwright-core'
+import { bootGame, launchBrowserPage, startScene, waitForScene } from './browserHarness.mjs'
 
-const EDGE_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe'
-const BASE_URL = 'http://127.0.0.1:4175/'
+const { browser, page } = await launchBrowserPage()
 
-const browser = await chromium.launch({
-  executablePath: EDGE_PATH,
-  headless: true,
-})
-
-const context = await browser.newContext()
-const page = await context.newPage()
-
-page.on('console', (message) => {
-  console.log(`[browser:${message.type()}] ${message.text()}`)
-})
-
-page.on('pageerror', (error) => {
-  console.error(`[pageerror] ${error.message}`)
-})
-
-async function waitForScene(sceneKey) {
-  await page.waitForFunction((key) => window.__game?.scene?.isActive(key) === true, sceneKey, {
-    timeout: 30000,
-  })
-}
-
-async function fastForwardLevel(sceneKey) {
+async function clearSceneEnemies(sceneKey) {
   await page.evaluate((key) => {
     const game = window.__game
     const scene = game.scene.getScene(key)
     scene.enemies.children.entries.slice().forEach((enemy) => enemy.destroy())
     scene.checkEnemiesDefeated()
   }, sceneKey)
-
-  await page.waitForFunction((key) => {
-    const game = window.__game
-    if (!game?.scene?.isActive('VictoryUIScene')) return false
-    const victory = game.scene.getScene('VictoryUIScene')
-    return victory?.currentLevelKey === key
-  }, sceneKey, { timeout: 10000 })
 }
 
-async function readVictoryState() {
-  return page.evaluate(() => {
+async function advanceVictory(expectedLevelKey, expectedNextLevelKey, expectedHeadline = 'STAGE CLEAR!') {
+  await waitForScene(page, 'VictoryUIScene', 10000)
+
+  const victoryState = await page.evaluate(() => {
     const game = window.__game
     const victory = game.scene.getScene('VictoryUIScene')
     return {
       activeScenes: game.scene.getScenes(true).map((scene) => scene.sys.settings.key),
-      currentLevelKey: victory?.currentLevelKey ?? null,
-      isLastLevel: victory?.isLastLevel ?? false,
-      nextLevelKey: victory?.nextLevelKey ?? null,
-      promptText: victory?.nextLevelText?.text ?? null,
-      headline: victory?.victoryText?.text ?? null,
-      subheading: victory?.subheadingText?.text ?? null,
+      currentLevelKey: victory.currentLevelKey,
+      isLastLevel: victory.isLastLevel,
+      nextLevelKey: victory.nextLevelKey,
+      promptText: victory.nextLevelText?.text ?? null,
+      headline: victory.victoryText?.text ?? null,
     }
   })
+
+  console.log('Victory state:', JSON.stringify(victoryState, null, 2))
+
+  if (victoryState.currentLevelKey !== expectedLevelKey) {
+    throw new Error(`Expected VictoryUIScene currentLevelKey=${expectedLevelKey}, got ${victoryState.currentLevelKey}`)
+  }
+
+  if (victoryState.nextLevelKey !== expectedNextLevelKey) {
+    throw new Error(`Expected VictoryUIScene nextLevelKey=${expectedNextLevelKey}, got ${victoryState.nextLevelKey}`)
+  }
+
+  if (victoryState.headline !== expectedHeadline) {
+    throw new Error(`Expected VictoryUIScene headline=${expectedHeadline}, got ${victoryState.headline}`)
+  }
+
+  await page.click('canvas')
+  await page.keyboard.press('Enter')
+  await page.waitForTimeout(500)
 }
 
-async function advanceFromVictory() {
+async function returnFromGameComplete() {
+  await waitForScene(page, 'GameCompleteUIScene', 10000)
   await page.click('canvas')
   await page.keyboard.press('Enter')
   await page.waitForTimeout(500)
 }
 
 try {
-  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' })
-  await page.evaluate(async () => {
-    window.__game = (await import('/src/main.js')).default
+  await bootGame(page)
+  await startScene(page, 'Level4Scene')
+
+  await clearSceneEnemies('Level4Scene')
+  await advanceVictory('Level4Scene', 'Level5Scene')
+  await waitForScene(page, 'Level5Scene', 10000)
+  console.log('Transitioned to Level5Scene')
+
+  await clearSceneEnemies('Level5Scene')
+  await advanceVictory('Level5Scene', 'Level6Scene')
+  await waitForScene(page, 'Level6Scene', 10000)
+  console.log('Transitioned to Level6Scene')
+
+  await clearSceneEnemies('Level6Scene')
+  await advanceVictory('Level6Scene', 'Level7Scene')
+  await waitForScene(page, 'Level7Scene', 10000)
+  const level7State = await page.evaluate(() => {
+    const level7 = window.__game.scene.getScene('Level7Scene')
+    return {
+      groundLayerName: level7.groundLayer?.layer?.name ?? null,
+      enemyCount: level7.enemies?.children?.entries?.filter((enemy) => enemy.active).length ?? null,
+    }
   })
+  if (level7State.groundLayerName !== 'Ground') {
+    throw new Error(`Expected Level7Scene ground layer to load, got ${level7State.groundLayerName}`)
+  }
+  console.log('Transitioned to Level7Scene')
 
-  await waitForScene('TitleScreen')
-  console.log('TitleScreen active')
-
-  await page.evaluate(() => {
-    const game = window.__game
-    game.scene.stop('TitleScreen')
-    game.scene.start('Level4Scene')
-  })
-
-  await waitForScene('Level4Scene')
-  console.log('Level4Scene active')
-
-  await fastForwardLevel('Level4Scene')
-  const level4Victory = await readVictoryState()
-  console.log('Victory after Level4:', JSON.stringify(level4Victory, null, 2))
-
-  await advanceFromVictory()
-  await waitForScene('Level5Scene')
-  console.log('Level5Scene active')
-
-  await fastForwardLevel('Level5Scene')
-  const level5Victory = await readVictoryState()
-  console.log('Victory after Level5:', JSON.stringify(level5Victory, null, 2))
-
-  await advanceFromVictory()
-  await waitForScene('Level6Scene')
-  console.log('Level6Scene active')
-
-  await fastForwardLevel('Level6Scene')
-  const level6Victory = await readVictoryState()
-  console.log('Victory after Level6:', JSON.stringify(level6Victory, null, 2))
-
-  await advanceFromVictory()
-  await waitForScene('Level7Scene')
-  console.log('Level7Scene active')
-
-  await fastForwardLevel('Level7Scene')
-  const level7Victory = await readVictoryState()
-  console.log('Victory after Level7:', JSON.stringify(level7Victory, null, 2))
-
-  await advanceFromVictory()
-  await page.waitForFunction(() => window.__game?.scene?.isActive('GameCompleteUIScene') === true, null, {
-    timeout: 10000,
-  })
-  console.log('GameCompleteUIScene active')
-
-  await advanceFromVictory()
-  await waitForScene('TitleScreen')
-  console.log('Returned to TitleScreen after Level7 victory')
+  await clearSceneEnemies('Level7Scene')
+  await advanceVictory('Level7Scene', null, 'FINAL STAGE CLEAR!')
+  await returnFromGameComplete()
+  await waitForScene(page, 'TitleScreen', 10000)
+  console.log('Returned to TitleScreen after level 7 completion')
 } finally {
   await browser.close()
 }

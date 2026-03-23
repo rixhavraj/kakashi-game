@@ -18,7 +18,9 @@ export class GameCompleteUIScene extends Phaser.Scene {
     this.isMobile = isMobileDevice()
 
     // Pause main game scene
-    this.scene.pause(this.currentLevelKey)
+    if (this.scene.isActive(this.currentLevelKey)) {
+      this.scene.pause(this.currentLevelKey)
+    }
     
     // Create semi-transparent black overlay
     const screenWidth = screenSize.width.value
@@ -93,6 +95,22 @@ export class GameCompleteUIScene extends Phaser.Scene {
     // Setup input listeners
     this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER)
     this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+    this.onKeyDown = (event) => {
+      if (event.code === 'Enter' || event.code === 'Space') {
+        this.returnToMenu()
+      }
+    }
+    this.input.keyboard.on('keydown', this.onKeyDown)
+    this.nativeKeyDown = (event) => {
+      if (event.code === 'Enter' || event.code === 'Space') {
+        this.returnToMenu()
+      }
+    }
+    window.addEventListener('keydown', this.nativeKeyDown)
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.input.keyboard?.off('keydown', this.onKeyDown)
+      window.removeEventListener('keydown', this.nativeKeyDown)
+    })
   }
 
   update() {
@@ -107,6 +125,7 @@ export class GameCompleteUIScene extends Phaser.Scene {
     }
 
     this.isReturningToMenu = true
+    const overlaySceneKey = this.sys.settings.key
 
     const currentScene = this.scene.get(this.currentLevelKey)
     if (currentScene?.backgroundMusic) {
@@ -119,6 +138,7 @@ export class GameCompleteUIScene extends Phaser.Scene {
     // Stop all scenes and return to title screen
     this.scene.stop(this.currentLevelKey)
     this.scene.stop("UIScene")
+    this.scene.stop(overlaySceneKey)
     this.scene.start("TitleScreen")
   }
 }

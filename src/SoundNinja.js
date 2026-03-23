@@ -347,15 +347,23 @@ export class SoundNinja extends Phaser.Physics.Arcade.Sprite {
   }
 
   canAdvance(direction) {
-    if (!this.body || !this.body.blocked.down || !this.scene.groundLayer) {
+    if (!this.body || !this.body.blocked.down) {
       return true
     }
 
     const lookAhead = this.body.halfWidth + 12
     const probeX = this.x + (direction === "left" ? -lookAhead : lookAhead)
     const probeY = this.body.bottom + 8
-    const supportTile = this.scene.groundLayer.getTileAtWorldXY(probeX, probeY)
 
+    if (typeof this.scene.hasSupportAtWorldXY === 'function') {
+      return this.scene.hasSupportAtWorldXY(probeX, probeY)
+    }
+
+    if (!this.scene.groundLayer) {
+      return true
+    }
+
+    const supportTile = this.scene.groundLayer.getTileAtWorldXY(probeX, probeY)
     return Boolean(supportTile && supportTile.index !== -1 && supportTile.collides)
   }
 

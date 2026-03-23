@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "node api.js && vite",
+    "build": "node api.js && vite build",
     "test": "node --test",
     "test:e2e:flow": "node tests/repro-level-flow.mjs",
     "test:e2e:level6": "node tests/repro-level6-platforms.mjs",

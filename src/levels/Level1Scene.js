@@ -1,7 +1,7 @@
-import { BaseLevelScene } from './BaseLevelScene.js'
-import { KakashiPlayer } from './KakashiPlayer.js'
+import { BaseLevelScene } from '../BaseLevelScene.js'
+import { KakashiPlayer } from '../KakashiPlayer.js'
 
-import { SoundNinja } from './SoundNinja.js'
+import { SoundNinja } from '../SoundNinja.js'
 
 export class Level1Scene extends BaseLevelScene {
   constructor() {

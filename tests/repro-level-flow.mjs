@@ -1,41 +1,6 @@
-import { chromium } from 'playwright-core'
+import { bootGame, launchBrowserPage, startScene, waitForScene } from './browserHarness.mjs'
 
-const EDGE_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe'
-const BASE_URL = 'http://127.0.0.1:4175/'
-
-const browser = await chromium.launch({
-  executablePath: EDGE_PATH,
-  headless: true,
-})
-
-const context = await browser.newContext()
-const page = await context.newPage()
-
-page.on('console', (message) => {
-  console.log(`[browser:${message.type()}] ${message.text()}`)
-})
-
-page.on('pageerror', (error) => {
-  console.error(`[pageerror] ${error.message}`)
-})
-
-async function waitForScene(sceneKey, timeout = 30000) {
-  await page.waitForFunction((key) => window.__game?.scene?.isActive(key) === true, sceneKey, {
-    timeout,
-  })
-}
-
-async function startScene(sceneKey) {
-  await page.evaluate((key) => {
-    const game = window.__game
-    for (const scene of game.scene.getScenes(true)) {
-      game.scene.stop(scene.sys.settings.key)
-    }
-    game.scene.start(key)
-  }, sceneKey)
-  await waitForScene(sceneKey)
-  console.log(`${sceneKey} active`)
-}
+const { browser, page } = await launchBrowserPage()
 
 async function clearSceneEnemies(sceneKey) {
   await page.evaluate((key) => {
@@ -47,7 +12,7 @@ async function clearSceneEnemies(sceneKey) {
 }
 
 async function advanceVictory(expectedLevelKey, expectedNextLevelKey, expectedHeadline = 'STAGE CLEAR!') {
-  await waitForScene('VictoryUIScene', 10000)
+  await waitForScene(page, 'VictoryUIScene', 10000)
 
   const victoryState = await page.evaluate(() => {
     const game = window.__game
@@ -81,22 +46,16 @@ async function advanceVictory(expectedLevelKey, expectedNextLevelKey, expectedHe
 }
 
 try {
-  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' })
-  await page.evaluate(async () => {
-    window.__game = (await import('/src/main.js')).default
-  })
-
-  await waitForScene('TitleScreen')
-  console.log('TitleScreen active')
-  await startScene('Level5Scene')
+  await bootGame(page)
+  await startScene(page, 'Level5Scene')
   await clearSceneEnemies('Level5Scene')
   await advanceVictory('Level5Scene', 'Level6Scene')
-  await waitForScene('Level6Scene', 10000)
+  await waitForScene(page, 'Level6Scene', 10000)
   console.log('Transitioned to Level6Scene')
 
   await clearSceneEnemies('Level6Scene')
   await advanceVictory('Level6Scene', 'Level7Scene')
-  await waitForScene('Level7Scene', 10000)
+  await waitForScene(page, 'Level7Scene', 10000)
   const level7State = await page.evaluate(() => {
     const level7 = window.__game.scene.getScene('Level7Scene')
     return {
@@ -111,7 +70,7 @@ try {
 
   await clearSceneEnemies('Level7Scene')
   await advanceVictory('Level7Scene', null, 'VICTORY!')
-  await waitForScene('TitleScreen', 10000)
+  await waitForScene(page, 'TitleScreen', 10000)
   console.log('Returned to TitleScreen after level 7 victory')
 } finally {
   await browser.close()

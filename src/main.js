@@ -55,4 +55,10 @@ const config = {
     GameOverUIScene],
 }
 
-export default new Phaser.Game(config)
+const game = new Phaser.Game(config)
+
+if (typeof window !== 'undefined') {
+  window.__game = game
+}
+
+export default game

@@ -105,9 +105,9 @@ export class Level6Scene extends BaseLevelScene {
     this.floatingPlatforms = this.physics.add.group({ allowGravity: false, immovable: true })
     this.floatingPlatformVisuals = this.add.group()
     const platformData = [
-      { x: 18 * 64, y: 11 * 64, offset: 4 * 64, duration: 3200, colliderWidth: 120, colliderHeight: 24, colliderYOffset: 6 },
-      { x: 30 * 64, y: 9 * 64, offset: 5 * 64, duration: 3600, colliderWidth: 120, colliderHeight: 24, colliderYOffset: 6 },
-      { x: 40 * 64, y: 7 * 64, offset: 3 * 64, duration: 2800, colliderWidth: 120, colliderHeight: 24, colliderYOffset: 6 },
+      { x: 18 * 64, y: 11 * 64, offset: 4 * 64, duration: 3200, colliderWidth: 136, colliderHeight: 24, colliderYOffset: 6 },
+      { x: 30 * 64, y: 9 * 64, offset: 5 * 64, duration: 3600, colliderWidth: 136, colliderHeight: 24, colliderYOffset: 6 },
+      { x: 40 * 64, y: 7 * 64, offset: 3 * 64, duration: 2800, colliderWidth: 136, colliderHeight: 24, colliderYOffset: 6 },
     ]
 
     platformData.forEach((config) => {
@@ -158,17 +158,31 @@ export class Level6Scene extends BaseLevelScene {
     const platformX = 47.5 * 64
     const platformY = 17.6 * 64
 
-    this.bossArenaVisual = this.add.rectangle(platformX, platformY, platformWidth, platformHeight, 0x2a163d, 0.45)
+    this.add.rectangle(platformX, platformY + 10, platformWidth + 28, platformHeight + 20, 0x000000, 0.16)
+      .setDepth(this.player.depth - 3)
+
+    this.bossArenaVisual = this.add.tileSprite(platformX, platformY, platformWidth, platformHeight - 6, 'forest_ground')
       .setOrigin(0.5, 0.5)
-    this.bossArenaVisual.setStrokeStyle(2, 0xff8c00, 0.5)
+      .setAlpha(0.96)
+      .setTint(0xd8c88f)
+      .setDepth(this.player.depth - 2)
 
-    this.physics.add.existing(this.bossArenaVisual, true)
-    this.bossArenaVisual.body.setSize(platformWidth, platformHeight)
-    this.bossArenaVisual.body.updateFromGameObject()
-    this.registerSupportBody(this.bossArenaVisual.body)
+    this.add.image(platformX - platformWidth / 2 + 34, platformY - 4, 'rocks_variant_2')
+      .setScale(0.34)
+      .setDepth(this.player.depth - 1)
+    this.add.image(platformX + platformWidth / 2 - 34, platformY - 4, 'rocks_variant_2')
+      .setScale(0.34)
+      .setFlipX(true)
+      .setDepth(this.player.depth - 1)
 
-    this.physics.add.collider(this.player, this.bossArenaVisual)
-    this.physics.add.collider(this.enemies, this.bossArenaVisual)
+    this.bossArenaCollider = this.add.rectangle(platformX, platformY - 6, platformWidth, 28, 0xffffff, 0)
+    this.physics.add.existing(this.bossArenaCollider, true)
+    this.bossArenaCollider.body.setSize(platformWidth, 28)
+    this.bossArenaCollider.body.updateFromGameObject()
+    this.registerSupportBody(this.bossArenaCollider.body)
+
+    this.physics.add.collider(this.player, this.bossArenaCollider)
+    this.physics.add.collider(this.enemies, this.bossArenaCollider)
   }
 
   createApproachPlatforms() {
@@ -279,7 +293,7 @@ export class Level6Scene extends BaseLevelScene {
         continue
       }
 
-      const carryX = platform.deltaX * 0.55
+      const carryX = platform.deltaX * 0.8
       actor.x += carryX
       if (actor.body.prev) {
         actor.body.prev.x += carryX

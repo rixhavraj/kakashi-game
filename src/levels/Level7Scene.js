@@ -1,6 +1,6 @@
-import { BaseLevelScene } from './BaseLevelScene.js'
-import { KakashiPlayer } from './KakashiPlayer.js'
-import { PainBoss } from './PainBoss.js'
+import { BaseLevelScene } from '../BaseLevelScene.js'
+import { KakashiPlayer } from '../KakashiPlayer.js'
+import { PainBoss } from '../PainBoss.js'
 
 export class Level7Scene extends BaseLevelScene {
   constructor() {

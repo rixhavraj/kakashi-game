@@ -11,6 +11,7 @@ export class Level6Scene extends BaseLevelScene {
     this.supportBodies = []
     this.movingPlatforms = []
     this.createBaseElements()
+    this.configureCharacterDepths()
     this.createFloatingPlatforms()
     this.createBossArenaPlatform()
     this.createApproachPlatforms()
@@ -101,6 +102,13 @@ export class Level6Scene extends BaseLevelScene {
     })
   }
 
+  configureCharacterDepths() {
+    this.player.setDepth(12)
+    this.enemies.children.entries.forEach((enemy) => {
+      enemy.setDepth(12)
+    })
+  }
+
   createFloatingPlatforms() {
     this.floatingPlatforms = this.physics.add.group({ allowGravity: false, immovable: true })
     this.floatingPlatformVisuals = this.add.group()
@@ -113,6 +121,7 @@ export class Level6Scene extends BaseLevelScene {
     platformData.forEach((config) => {
       const visual = this.add.image(config.x, config.y, "rocks_variant_2")
         .setScale(0.48)
+        .setDepth(this.player.depth - 1)
       this.floatingPlatformVisuals.add(visual)
 
       const collider = this.add.rectangle(

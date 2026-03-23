@@ -163,32 +163,22 @@ export class Level6Scene extends BaseLevelScene {
 
   createBossArenaPlatform() {
     const platformWidth = 14 * 64
-    const platformHeight = 1.4 * 64
     const platformX = 47.5 * 64
     const platformY = 17.6 * 64
-
-    this.add.rectangle(platformX, platformY + 10, platformWidth + 28, platformHeight + 20, 0x000000, 0.16)
-      .setDepth(this.player.depth - 3)
-
-    this.bossArenaVisual = this.add.tileSprite(platformX, platformY, platformWidth, platformHeight - 6, 'forest_ground')
-      .setOrigin(0.5, 0.5)
-      .setAlpha(0.96)
-      .setTint(0xd8c88f)
-      .setDepth(this.player.depth - 2)
-
-    this.add.image(platformX - platformWidth / 2 + 34, platformY - 4, 'rocks_variant_2')
-      .setScale(0.34)
-      .setDepth(this.player.depth - 1)
-    this.add.image(platformX + platformWidth / 2 - 34, platformY - 4, 'rocks_variant_2')
-      .setScale(0.34)
-      .setFlipX(true)
-      .setDepth(this.player.depth - 1)
 
     this.bossArenaCollider = this.add.rectangle(platformX, platformY - 6, platformWidth, 28, 0xffffff, 0)
     this.physics.add.existing(this.bossArenaCollider, true)
     this.bossArenaCollider.body.setSize(platformWidth, 28)
     this.bossArenaCollider.body.updateFromGameObject()
     this.registerSupportBody(this.bossArenaCollider.body)
+
+    this.createPlatformVisual(
+      platformX,
+      this.bossArenaCollider.body.top,
+      platformWidth,
+      24,
+      { addEdgeCaps: true }
+    )
 
     this.physics.add.collider(this.player, this.bossArenaCollider)
     this.physics.add.collider(this.enemies, this.bossArenaCollider)
@@ -197,29 +187,56 @@ export class Level6Scene extends BaseLevelScene {
   createApproachPlatforms() {
     this.approachPlatforms = this.physics.add.staticGroup()
     const platformDefs = [
-      { x: 36.5 * 64, y: 17.5 * 64, width: 8 * 64, height: 1.2 * 64 },
-      { x: 40.5 * 64, y: 15.5 * 64, width: 6 * 64, height: 1.2 * 64 },
-      { x: 44.5 * 64, y: 13.3 * 64, width: 5 * 64, height: 1.2 * 64 },
-      { x: 48 * 64, y: 11.5 * 64, width: 4 * 64, height: 1.2 * 64 },
+      { x: 36.5 * 64, topY: 17.5 * 64 - (1.2 * 64) / 2, width: 8 * 64 },
+      { x: 40.5 * 64, topY: 15.5 * 64 - (1.2 * 64) / 2, width: 6 * 64 },
+      { x: 44.5 * 64, topY: 13.3 * 64 - (1.2 * 64) / 2, width: 5 * 64 },
+      { x: 48 * 64, topY: 11.5 * 64 - (1.2 * 64) / 2, width: 4 * 64 },
     ]
 
     platformDefs.forEach((cfg) => {
-      const colliderRect = this.add.rectangle(cfg.x, cfg.y, cfg.width, cfg.height, 0xffffff, 0)
+      const colliderHeight = 28
+      const colliderY = cfg.topY + colliderHeight / 2
+      const colliderRect = this.add.rectangle(cfg.x, colliderY, cfg.width, colliderHeight, 0xffffff, 0)
       this.physics.add.existing(colliderRect, true)
-      colliderRect.body.setSize(cfg.width, cfg.height)
+      colliderRect.body.setSize(cfg.width, colliderHeight)
       colliderRect.body.updateFromGameObject()
       this.registerSupportBody(colliderRect.body)
-
-      const tilestrip = this.add.tileSprite(cfg.x, cfg.y, cfg.width, cfg.height + 12, 'forest_ground')
-        .setOrigin(0.5, 0.5)
-        .setAlpha(0.95)
-      tilestrip.setDepth(this.player.depth - 1)
-      this.add.rectangle(cfg.x, cfg.y, cfg.width, cfg.height + 14, 0x000000, 0.15).setDepth(tilestrip.depth - 1)
+      this.createPlatformVisual(cfg.x, cfg.topY, cfg.width, 22)
 
       this.physics.add.collider(this.player, colliderRect)
       this.physics.add.collider(this.enemies, colliderRect)
       this.approachPlatforms.add(colliderRect)
     })
+  }
+
+  createPlatformVisual(x, topY, width, height, options = {}) {
+    const { addEdgeCaps = false } = options
+    const shadowDepth = this.player.depth - 3
+    const baseDepth = this.player.depth - 2
+    const capDepth = this.player.depth - 1
+    const centerY = topY + height / 2
+
+    this.add.rectangle(x, centerY + 8, width + 20, height + 10, 0x000000, 0.16)
+      .setDepth(shadowDepth)
+
+    this.add.rectangle(x, centerY, width, height, 0x3c2f1f, 0.92)
+      .setStrokeStyle(2, 0x8b6b44, 0.5)
+      .setDepth(baseDepth)
+
+    this.add.rectangle(x, topY + 4, width - 10, 8, 0x78a83f, 0.9)
+      .setDepth(capDepth)
+
+    if (!addEdgeCaps) {
+      return
+    }
+
+    this.add.image(x - width / 2 + 34, centerY + 2, 'rocks_variant_2')
+      .setScale(0.34)
+      .setDepth(capDepth)
+    this.add.image(x + width / 2 - 34, centerY + 2, 'rocks_variant_2')
+      .setScale(0.34)
+      .setFlipX(true)
+      .setDepth(capDepth)
   }
 
   createChakraStorm() {

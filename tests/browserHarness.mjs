@@ -48,30 +48,16 @@ export async function bootGame(page) {
   await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' })
   await page.waitForFunction(() => Boolean(window.__game), null, { timeout: 30000 })
 
-  try {
-    await ensureAssetsLoaded(page, 45000)
-  } catch (error) {
-    await page.evaluate(() => {
-      const game = window.__game
-      for (const scene of game.scene.getScenes(true)) {
-        game.scene.stop(scene.sys.settings.key)
-      }
-      game.scene.start('InitialLoadingScene')
-    })
-    await ensureAssetsLoaded(page)
-  }
-
   await page.evaluate(() => {
     const game = window.__game
-    if (!game.scene.isActive('TitleScreen')) {
-      for (const scene of game.scene.getScenes(true)) {
-        game.scene.stop(scene.sys.settings.key)
-      }
-      game.scene.start('TitleScreen')
+    for (const scene of game.scene.getScenes(true)) {
+      game.scene.stop(scene.sys.settings.key)
     }
+    game.scene.start('InitialLoadingScene')
   })
 
-  await waitForScene(page, 'TitleScreen')
+  await waitForScene(page, 'TitleScreen', 150000)
+  await ensureAssetsLoaded(page, 30000)
   console.log('TitleScreen active')
 }
 

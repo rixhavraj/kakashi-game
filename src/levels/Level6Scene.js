@@ -44,8 +44,8 @@ export class Level6Scene extends BaseLevelScene {
       { x: 21, y: 13 },
       { x: 26, y: 17 },
       { x: 32, y: 14 },
-      { x: 36, y: 18 },
-      { x: 42, y: 16 },
+      { x: 35, y: 16 },
+      { x: 42, y: 14 },
     ].forEach((pos) => {
       this.addEnemy(pos.x * 64, pos.y * 64)
     })
@@ -214,26 +214,28 @@ export class Level6Scene extends BaseLevelScene {
     const shadowDepth = this.player.depth - 3
     const baseDepth = this.player.depth - 2
     const capDepth = this.player.depth - 1
-    const centerY = topY + height / 2
+    const surfaceInset = 8
+    const surfaceTopY = topY + surfaceInset
+    const centerY = surfaceTopY + height / 2
 
-    this.add.rectangle(x, centerY + 8, width + 20, height + 10, 0x000000, 0.16)
+    this.add.rectangle(x, centerY + 5, width + 16, height + 6, 0x000000, 0.14)
       .setDepth(shadowDepth)
 
-    this.add.rectangle(x, centerY, width, height, 0x3c2f1f, 0.92)
+    this.add.rectangle(x, centerY, width, height, 0x3c2f1f, 0.9)
       .setStrokeStyle(2, 0x8b6b44, 0.5)
       .setDepth(baseDepth)
 
-    this.add.rectangle(x, topY + 4, width - 10, 8, 0x78a83f, 0.9)
+    this.add.rectangle(x, surfaceTopY + 3, width - 12, 6, 0x78a83f, 0.9)
       .setDepth(capDepth)
 
     if (!addEdgeCaps) {
       return
     }
 
-    this.add.image(x - width / 2 + 34, centerY + 2, 'rocks_variant_2')
+    this.add.image(x - width / 2 + 34, centerY + 1, 'rocks_variant_2')
       .setScale(0.34)
       .setDepth(capDepth)
-    this.add.image(x + width / 2 - 34, centerY + 2, 'rocks_variant_2')
+    this.add.image(x + width / 2 - 34, centerY + 1, 'rocks_variant_2')
       .setScale(0.34)
       .setFlipX(true)
       .setDepth(capDepth)
@@ -248,6 +250,7 @@ export class Level6Scene extends BaseLevelScene {
     this.stormOverlay = this.add.rectangle(zoneX, zoneY, zoneWidth, zoneHeight, 0x7e00ff, 0.25)
       .setOrigin(0.5, 0.5)
       .setScrollFactor(1)
+      .setVisible(false)
 
     this.chakraStormZone = this.add.zone(zoneX, zoneY, zoneWidth, zoneHeight)
     this.physics.add.existing(this.chakraStormZone, true)
@@ -270,7 +273,7 @@ export class Level6Scene extends BaseLevelScene {
   }
 
   animateStorm() {
-    if (this.stormOverlay) {
+    if (this.stormOverlay?.visible) {
       this.stormOverlay.alpha = 0.2 + 0.15 * Math.sin(this.time.now * 0.004)
     }
   }

@@ -121,6 +121,7 @@ export class Level7Scene extends BaseLevelScene {
     zoneConfigs.forEach((cfg) => {
       const overlay = this.add.rectangle(cfg.x, cfg.y, cfg.width, cfg.height, 0x7dd9ff, 0.25)
         .setOrigin(0.5, 0.5)
+        .setVisible(false)
       const zone = this.add.zone(cfg.x, cfg.y, cfg.width, cfg.height)
       this.physics.add.existing(zone, true)
       this.physics.add.overlap(this.player, zone, () => {
